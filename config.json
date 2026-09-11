@@ -1,0 +1,16 @@
+{
+  "_comment": "Prototype settings. Domain and site name are placeholders until Eslam picks a domain.",
+  "site_name_ar": "أسعار الذهب والفضة (اسم مؤقت)",
+  "site_name_en": "Gold & Silver Prices (placeholder name)",
+  "base_url": "https://example.com",
+  "noindex": true,
+  "provider": "sample",
+  "provider_api_key_env": "METALS_API_KEY",
+  "timezone_name": "Asia/Riyadh",
+  "timezone_offset_hours": 3,
+  "sar_per_usd_peg": 3.75,
+  "gold_karats": [24, 22, 21, 18],
+  "silver_purities": [999, 925],
+  "history_days": 7,
+  "max_price_age_minutes": 90
+}

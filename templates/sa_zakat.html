@@ -1,0 +1,57 @@
+<h1>حاسبة زكاة الذهب والفضة</h1>
+<p class="updated">الأسعار المستخدمة: آخر تحديث <bdi dir="ltr">{{updated}}</bdi> بتوقيت الرياض</p>
+<p class="note important">هذه حاسبة تعتمد على أقوال منشورة لأهل العلم مع ذكر مصادرها، وليست فتوى. عند الشك اسأل جهة الفتوى الموثوقة.</p>
+
+<section>
+  <h2>نصاب الذهب والفضة اليوم بالريال</h2>
+  <table class="prices">
+    <thead><tr><th>النصاب</th><th>قيمته اليوم (ريال)</th></tr></thead>
+    <tbody>
+      <tr><th>{{nisab_gold_85_label}} {{nisab_gold_85_refs}}</th><td>{{nisab_gold_85}}</td></tr>
+      <tr><th>{{nisab_gold_92_label}} {{nisab_gold_92_refs}}</th><td>{{nisab_gold_92}}</td></tr>
+      <tr><th>{{nisab_silver_label}} {{nisab_silver_refs}}</th><td>{{nisab_silver}}</td></tr>
+    </tbody>
+  </table>
+  <p class="note">{{silver_note}} {{silver_note_refs}}</p>
+</section>
+
+<section class="calc" id="zakat-calc">
+  <h2>احسب زكاتك</h2>
+  <fieldset>
+    <legend>الذهب</legend>
+    <div id="zakat-gold-rows">
+      <div class="row"><label>الوزن (جرام) <input type="number" class="zg-weight" min="0" step="0.01" inputmode="decimal"></label>
+      <label>العيار <select class="zg-karat">{{karat_options}}</select></label></div>
+    </div>
+    <button type="button" id="zakat-add-row">+ أضف قطعة بعيار آخر</button>
+  </fieldset>
+  <fieldset>
+    <legend>الفضة</legend>
+    <div class="row"><label>الوزن (جرام) <input type="number" id="zs-weight" min="0" step="0.01" inputmode="decimal"></label>
+    <label>العيار <select id="zs-purity"><option value="999">999</option><option value="925">925</option></select></label></div>
+  </fieldset>
+  <fieldset>
+    <legend>هل الذهب أو الفضة حُليّ معدّ للاستعمال (يُلبس)؟</legend>
+    <label class="inline"><input type="radio" name="zjewel" value="no" checked> لا، مدّخر أو للتجارة</label>
+    <label class="inline"><input type="radio" name="zjewel" value="yes"> نعم، حُليّ يُلبس</label>
+  </fieldset>
+  <output id="zakat-result" aria-live="polite">أدخل الوزن لعرض النتيجة</output>
+</section>
+
+<section>
+  <h2>القواعد المستخدمة في الحاسبة</h2>
+  <ul>
+    <li>مقدار الزكاة: {{rate_text}} {{rate_refs}}</li>
+    <li>{{karat_rule}} {{karat_rule_refs}}</li>
+    <li>تحسب الحاسبة الذهب والفضة كلًّا على حدة. ضمّ أحدهما إلى الآخر لإكمال النصاب مسألة يُرجع فيها إلى أهل العلم.</li>
+  </ul>
+  <h3>زكاة الحلي المعدّ للاستعمال: قولان مشهوران</h3>
+  <ul>
+    <li>{{opinion_must}} {{opinion_must_refs}}</li>
+    <li>{{opinion_exempt}} {{opinion_exempt_refs}}</li>
+  </ul>
+  <h3>المصادر</h3>
+  {{sources}}
+  <p class="note">راجعنا المصادر بتاريخ <bdi dir="ltr">{{reviewed}}</bdi>.</p>
+</section>
+<script type="application/json" id="prices">{{prices_json}}</script>

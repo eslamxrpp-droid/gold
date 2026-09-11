@@ -1,0 +1,25 @@
+<h1>أسعار الذهب اليوم: مرتفع ولا نازل؟</h1>
+<div class="verdict {{direction_class}}">
+  <span class="big">{{direction_arrow}} {{direction_word}}</span>
+  <span>{{chg_day}} مقارنة بإغلاق أمس ({{prev_date}})</span>
+</div>
+<p class="lead">عيار 21 اليوم <strong>{{g21}} ريال</strong> للجرام ·
+  <span class="{{week_class}}">{{chg_week}} مقارنة بالأسبوع الماضي ({{week_date}})</span></p>
+<p class="updated">آخر تحديث: <bdi dir="ltr">{{updated}}</bdi> بتوقيت الرياض</p>
+
+<section>
+  <h2>التغير بالريال لكل جرام حسب العيار</h2>
+  {{change_table}}
+</section>
+
+<section>
+  <h2>حركة السعر آخر 7 أيام</h2>
+  {{history_table}}
+  <p class="note">السوق العالمية للذهب مغلقة غالبًا يومي السبت والأحد، لذلك قد يبقى السعر ثابتًا في نهاية الأسبوع.</p>
+</section>
+
+<section>
+  <h2>ماذا يعني «مرتفع» أو «نازل»؟</h2>
+  <p>نقارن السعر الحالي بآخر سعر مسجّل ليوم أمس. إذا كان الفرق أقل من 0.05% نعتبر السعر مستقرًا. هذه مقارنة للأسعار فقط وليست توقعًا لاتجاه الذهب أو نصيحة بالشراء أو البيع.</p>
+</section>
+<script type="application/json" id="prices">{{prices_json}}</script>

@@ -1,0 +1,53 @@
+:root {
+  --bg: #fbfaf7; --fg: #1d1b16; --muted: #6b665c; --line: #e4dfd3; --card: #fff;
+  --gold: #a87b12; --up: #147a3d; --down: #b3261e; --flat: #6b665c;
+  font-family: "Segoe UI", Tahoma, "Noto Sans Arabic", "Noto Sans", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); line-height: 1.7; font-size: 17px; }
+main, header.site, footer.site { max-width: 860px; margin-inline: auto; padding-inline: 16px; }
+.sample { background: #fff3cd; color: #664d03; text-align: center; padding: 6px 16px; font-weight: 600; }
+header.site { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; padding-block: 14px; border-bottom: 1px solid var(--line); }
+.brand { font-weight: 700; color: var(--gold); text-decoration: none; font-size: 1.1rem; }
+header nav { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+header nav a { color: var(--fg); text-decoration: none; font-size: .95rem; }
+header nav a[aria-current="page"] { color: var(--gold); font-weight: 700; }
+h1 { font-size: 1.7rem; line-height: 1.3; margin-block: 24px 8px; }
+h2 { font-size: 1.25rem; margin-block: 28px 10px; }
+h3 { font-size: 1.05rem; margin-block: 18px 6px; }
+.lead { font-size: 1.15rem; margin-block: 6px; }
+.updated, .note { color: var(--muted); font-size: .92rem; }
+.note.important { background: #f3efe4; border-inline-start: 4px solid var(--gold); padding: 8px 12px; color: var(--fg); }
+.up { color: var(--up); } .down { color: var(--down); } .flat { color: var(--flat); }
+table.prices { width: 100%; border-collapse: collapse; background: var(--card); font-variant-numeric: tabular-nums; }
+.prices th, .prices td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: start; }
+.prices thead th { background: #f3efe4; font-size: .9rem; }
+section { overflow-x: auto; }
+.verdict { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin-block: 12px; }
+.verdict .big { font-size: 2rem; font-weight: 800; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-block: 24px; }
+.card { display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; color: var(--fg); text-decoration: none; }
+.card strong { color: var(--gold); }
+.card span { color: var(--muted); font-size: .92rem; }
+.other-metal { background: var(--card); border: 1px dashed var(--line); padding: 10px 14px; border-radius: 8px; }
+.calc { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-block: 20px; }
+.calc label { display: block; margin-block: 8px; font-weight: 600; }
+.calc label.inline { display: inline-block; font-weight: 400; margin-inline-end: 16px; }
+.calc input[type=number], .calc select { display: block; width: 100%; max-width: 320px; padding: 8px 10px; font-size: 1rem; border: 1px solid #cfc8b8; border-radius: 6px; margin-top: 4px; background: #fff; }
+.calc .row { display: flex; flex-wrap: wrap; gap: 0 16px; }
+.calc .row label { flex: 1 1 180px; }
+.calc fieldset { border: 1px solid var(--line); border-radius: 8px; margin-block: 12px; }
+.calc button { padding: 6px 12px; font-size: .95rem; border: 1px solid var(--gold); color: var(--gold); background: #fff; border-radius: 6px; cursor: pointer; }
+.calc output { display: block; margin-top: 12px; padding: 12px; background: #f3efe4; border-radius: 8px; font-size: 1.05rem; }
+.calc output table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+.calc output td, .calc output th { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: start; }
+.sources { font-size: .92rem; }
+footer.site { border-top: 1px solid var(--line); margin-top: 40px; padding-block: 16px 32px; color: var(--muted); font-size: .88rem; }
+.prices th, .prices td { white-space: nowrap; }
+.prices thead th { white-space: normal; }
+bdi { white-space: nowrap; }
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  .prices th, .prices td { padding: 6px 5px; font-size: .9rem; }
+}
+.other-metal { display: block; margin-block: 12px; }

@@ -1,0 +1,62 @@
+{
+  "_comment": "SAMPLE DATA for building and testing the prototype. NOT real prices. Moves are invented; end values are rounded approximate spot from 2026-09-11.",
+  "is_sample": true,
+  "source_name": "Sample data (not real prices)",
+  "timestamp_utc": "2026-09-11T12:00:00Z",
+  "latest": {
+    "gold_usd_oz": 4362.0,
+    "silver_usd_oz": 64.4,
+    "gold_bid_usd_oz": 4359.82,
+    "gold_ask_usd_oz": 4364.18,
+    "silver_bid_usd_oz": 64.271,
+    "silver_ask_usd_oz": 64.529
+  },
+  "fx_per_usd": {
+    "SAR": 3.75,
+    "AED": 3.6725,
+    "INR": 88.0,
+    "PKR": 282.0
+  },
+  "daily_closes": [
+    {
+      "date": "2026-09-04",
+      "gold_usd_oz": 4336.63,
+      "silver_usd_oz": 64.306
+    },
+    {
+      "date": "2026-09-05",
+      "gold_usd_oz": 4366.98,
+      "silver_usd_oz": 65.013
+    },
+    {
+      "date": "2026-09-06",
+      "gold_usd_oz": 4318.95,
+      "silver_usd_oz": 63.713
+    },
+    {
+      "date": "2026-09-07",
+      "gold_usd_oz": 4340.54,
+      "silver_usd_oz": 64.223
+    },
+    {
+      "date": "2026-09-08",
+      "gold_usd_oz": 4331.86,
+      "silver_usd_oz": 63.966
+    },
+    {
+      "date": "2026-09-09",
+      "gold_usd_oz": 4370.85,
+      "silver_usd_oz": 64.733
+    },
+    {
+      "date": "2026-09-10",
+      "gold_usd_oz": 4344.62,
+      "silver_usd_oz": 63.762
+    },
+    {
+      "date": "2026-09-11",
+      "gold_usd_oz": 4362.0,
+      "silver_usd_oz": 64.4
+    }
+  ]
+}

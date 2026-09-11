@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>حاسبة زكاة الذهب والفضة ونصاب الذهب اليوم بالريال</title>
+<meta name="description" content="احسب زكاة الذهب والفضة: نصاب الذهب والفضة اليوم بالريال السعودي، مع ذكر أقوال العلماء ومصادرها.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://example.com/sa/zakat/">
+
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="site">
+  <a class="brand" href="/sa/">أسعار الذهب والفضة (اسم مؤقت)</a>
+  <nav><a href='/sa/'>سعر الذهب اليوم</a><a href='/sa/up-or-down/'>مرتفع ولا نازل</a><a href='/sa/sell-price/'>سعر البيع</a><a href='/sa/calculator/'>حاسبة الذهب</a><a href='/sa/zakat/' aria-current="page">زكاة الذهب والفضة</a><a href='/sa/silver/'>سعر الفضة</a><a href='/sa/en/'>English</a></nav>
+</header>
+<main>
+<h1>حاسبة زكاة الذهب والفضة</h1>
+<p class="updated">الأسعار المستخدمة: آخر تحديث <bdi dir="ltr">2026-09-12 01:32</bdi> بتوقيت الرياض</p>
+<p class="note important">هذه حاسبة تعتمد على أقوال منشورة لأهل العلم مع ذكر مصادرها، وليست فتوى. عند الشك اسأل جهة الفتوى الموثوقة.</p>
+
+<section>
+  <h2>نصاب الذهب والفضة اليوم بالريال</h2>
+  <table class="prices">
+    <thead><tr><th>النصاب</th><th>قيمته اليوم (ريال)</th></tr></thead>
+    <tbody>
+      <tr><th>85 جرام ذهب خالص (عشرون مثقالًا × 4.25 جرام) <sup>[3]</sup> <sup>[4]</sup></th><td>44,568.72</td></tr>
+      <tr><th>92 جرامًا (عشرون مثقالًا، كما في فتاوى الشيخ ابن باز) <sup>[1]</sup> <sup>[2]</sup></th><td>48,239.09</td></tr>
+      <tr><th>595 جرام فضة خالصة (مائة وأربعون مثقالًا) <sup>[3]</sup></th><td>4,626.39</td></tr>
+    </tbody>
+  </table>
+  <p class="note">ذكر الشيخ ابن باز نصاب الفضة بمائة وأربعين مثقالًا (ستة وخمسين ريالًا سعوديًا من الفضة) دون تحديده بالجرام. <sup>[2]</sup></p>
+</section>
+
+<section class="calc" id="zakat-calc">
+  <h2>احسب زكاتك</h2>
+  <fieldset>
+    <legend>الذهب</legend>
+    <div id="zakat-gold-rows">
+      <div class="row"><label>الوزن (جرام) <input type="number" class="zg-weight" min="0" step="0.01" inputmode="decimal"></label>
+      <label>العيار <select class="zg-karat"><option value='24'>عيار 24</option><option value='22'>عيار 22</option><option value='21' selected>عيار 21</option><option value='18'>عيار 18</option></select></label></div>
+    </div>
+    <button type="button" id="zakat-add-row">+ أضف قطعة بعيار آخر</button>
+  </fieldset>
+  <fieldset>
+    <legend>الفضة</legend>
+    <div class="row"><label>الوزن (جرام) <input type="number" id="zs-weight" min="0" step="0.01" inputmode="decimal"></label>
+    <label>العيار <select id="zs-purity"><option value="999">999</option><option value="925">925</option></select></label></div>
+  </fieldset>
+  <fieldset>
+    <legend>هل الذهب أو الفضة حُليّ معدّ للاستعمال (يُلبس)؟</legend>
+    <label class="inline"><input type="radio" name="zjewel" value="no" checked> لا، مدّخر أو للتجارة</label>
+    <label class="inline"><input type="radio" name="zjewel" value="yes"> نعم، حُليّ يُلبس</label>
+  </fieldset>
+  <output id="zakat-result" aria-live="polite">أدخل الوزن لعرض النتيجة</output>
+</section>
+
+<section>
+  <h2>القواعد المستخدمة في الحاسبة</h2>
+  <ul>
+    <li>مقدار الزكاة: ربع العشر (2.5%) إذا بلغ المال النصاب وحال عليه الحول (سنة هجرية) <sup>[1]</sup> <sup>[3]</sup></li>
+    <li>يُحسب النصاب على الذهب الخالص: وزن القطعة × (العيار ÷ 24). مثال: نصاب عيار 21 = 85 × 24 ÷ 21 ≈ 97.14 جرامًا. <sup>[4]</sup></li>
+    <li>تحسب الحاسبة الذهب والفضة كلًّا على حدة. ضمّ أحدهما إلى الآخر لإكمال النصاب مسألة يُرجع فيها إلى أهل العلم.</li>
+  </ul>
+  <h3>زكاة الحلي المعدّ للاستعمال: قولان مشهوران</h3>
+  <ul>
+    <li>تجب الزكاة في الحلي المعد للاستعمال إذا بلغ النصاب: قول الحنفية، وهو ما أفتى به الشيخ ابن باز والشيخ ابن عثيمين واللجنة الدائمة. <sup>[1]</sup> <sup>[5]</sup></li>
+    <li>لا زكاة في الحلي المباح المعد للاستعمال: قول جمهور المالكية والشافعية والحنابلة. <sup>[5]</sup></li>
+  </ul>
+  <h3>المصادر</h3>
+  <ol class='sources'><li><a href='https://binbaz.org.sa/fatwas/9631' rel='nofollow noopener' target='_blank'>حكم زكاة الحلي وبيان نصاب الذهب — موقع الشيخ ابن باز</a></li><li><a href='https://binbaz.org.sa/fatwas/18047' rel='nofollow noopener' target='_blank'>نصاب الذهب والفضة — موقع الشيخ ابن باز</a></li><li><a href='https://www.islamweb.net/ar/fatwa/111487' rel='nofollow noopener' target='_blank'>مقدار النصاب في الذهب والفضة — إسلام ويب، فتوى 111487</a></li><li><a href='https://islamqa.info/ar/answers/396499' rel='nofollow noopener' target='_blank'>حساب زكاة الذهب عيار 21 — الإسلام سؤال وجواب 396499</a></li><li><a href='https://islamqa.info/ar/answers/221758' rel='nofollow noopener' target='_blank'>تفصيل خلاف العلماء وأدلتهم في زكاة الحلي — الإسلام سؤال وجواب 221758</a></li></ol>
+  <p class="note">راجعنا المصادر بتاريخ <bdi dir="ltr">2026-09-11</bdi>.</p>
+</section>
+<script type="application/json" id="prices">{"gold_sar_g": 524.3379, "gold_bid_sar_g": 524.1601, "silver_sar_g": 7.7754, "karats": [24, 22, 21, 18], "updated": "2026-09-12 01:32", "zakat_rate": 0.025, "gold_nisab": [85, 92], "silver_nisab": [595]}</script>
+
+</main>
+<footer class="site">
+  <p><strong>آخر تحديث:</strong> <bdi dir="ltr">2026-09-12 01:32</bdi> بتوقيت الرياض · <strong>المصدر:</strong> Metals.Dev</p>
+  <p>الأسعار المعروضة أسعار السوق العالمية للذهب والفضة محوّلة إلى الريال السعودي، وليست أسعار المحلات. سعر المحل يشمل عادةً المصنعية وهامش الربح، وسعر شراء المحل للذهب المستعمل أقل من سعر السوق. المعلومات للاسترشاد فقط وليست نصيحة مالية.</p>
+</footer>
+
+<script src="/static/calc.js" defer></script>
+</body>
+</html>

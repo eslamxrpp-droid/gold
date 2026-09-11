@@ -1,0 +1,30 @@
+{
+  "_comment": "Zakat numbers used by the calculator. Each value has its source. Claude does not issue rulings: where scholars differ, the page shows both views.",
+  "reviewed": "2026-09-11",
+  "rate": {
+    "value": 0.025,
+    "text_ar": "ربع العشر (2.5%) إذا بلغ المال النصاب وحال عليه الحول (سنة هجرية)",
+    "sources": ["ibnbaz_9631", "islamweb_111487"]
+  },
+  "gold_nisab_grams_pure": [
+    {"grams": 85, "label_ar": "85 جرام ذهب خالص (عشرون مثقالًا × 4.25 جرام)", "sources": ["islamweb_111487", "islamqa_396499"]},
+    {"grams": 92, "label_ar": "92 جرامًا (عشرون مثقالًا، كما في فتاوى الشيخ ابن باز)", "sources": ["ibnbaz_9631", "ibnbaz_18047"]}
+  ],
+  "silver_nisab_grams_pure": [
+    {"grams": 595, "label_ar": "595 جرام فضة خالصة (مائة وأربعون مثقالًا)", "sources": ["islamweb_111487"]}
+  ],
+  "silver_nisab_note_ar": "ذكر الشيخ ابن باز نصاب الفضة بمائة وأربعين مثقالًا (ستة وخمسين ريالًا سعوديًا من الفضة) دون تحديده بالجرام.",
+  "karat_rule_ar": "يُحسب النصاب على الذهب الخالص: وزن القطعة × (العيار ÷ 24). مثال: نصاب عيار 21 = 85 × 24 ÷ 21 ≈ 97.14 جرامًا.",
+  "karat_rule_sources": ["islamqa_396499"],
+  "jewelry_opinions": [
+    {"id": "must_pay", "text_ar": "تجب الزكاة في الحلي المعد للاستعمال إذا بلغ النصاب: قول الحنفية، وهو ما أفتى به الشيخ ابن باز والشيخ ابن عثيمين واللجنة الدائمة.", "sources": ["ibnbaz_9631", "islamqa_221758"]},
+    {"id": "exempt", "text_ar": "لا زكاة في الحلي المباح المعد للاستعمال: قول جمهور المالكية والشافعية والحنابلة.", "sources": ["islamqa_221758"]}
+  ],
+  "sources": {
+    "ibnbaz_9631": {"title": "حكم زكاة الحلي وبيان نصاب الذهب — موقع الشيخ ابن باز", "url": "https://binbaz.org.sa/fatwas/9631"},
+    "ibnbaz_18047": {"title": "نصاب الذهب والفضة — موقع الشيخ ابن باز", "url": "https://binbaz.org.sa/fatwas/18047"},
+    "islamweb_111487": {"title": "مقدار النصاب في الذهب والفضة — إسلام ويب، فتوى 111487", "url": "https://www.islamweb.net/ar/fatwa/111487"},
+    "islamqa_396499": {"title": "حساب زكاة الذهب عيار 21 — الإسلام سؤال وجواب 396499", "url": "https://islamqa.info/ar/answers/396499"},
+    "islamqa_221758": {"title": "تفصيل خلاف العلماء وأدلتهم في زكاة الحلي — الإسلام سؤال وجواب 221758", "url": "https://islamqa.info/ar/answers/221758"}
+  }
+}

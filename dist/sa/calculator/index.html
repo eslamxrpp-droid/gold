@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>حاسبة الذهب: احسب سعر الذهب اليوم بالوزن والعيار</title>
+<meta name="description" content="حاسبة سعر الذهب اليوم في السعودية: أدخل الوزن بالجرام واختر العيار لتعرف القيمة بالريال.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://example.com/sa/calculator/">
+
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="site">
+  <a class="brand" href="/sa/">أسعار الذهب والفضة (اسم مؤقت)</a>
+  <nav><a href='/sa/'>سعر الذهب اليوم</a><a href='/sa/up-or-down/'>مرتفع ولا نازل</a><a href='/sa/sell-price/'>سعر البيع</a><a href='/sa/calculator/' aria-current="page">حاسبة الذهب</a><a href='/sa/zakat/'>زكاة الذهب والفضة</a><a href='/sa/silver/'>سعر الفضة</a><a href='/sa/en/'>English</a></nav>
+</header>
+<main>
+<h1>حاسبة الذهب: احسب سعر ذهبك اليوم</h1>
+<p class="updated">الأسعار المستخدمة: آخر تحديث <bdi dir="ltr">2026-09-12 01:32</bdi> بتوقيت الرياض · عيار 21 = 458.80 ريال/جرام</p>
+
+<section class="calc" id="value-calc">
+  <label>الوزن (جرام) <input type="number" id="calc-weight" min="0" step="0.01" inputmode="decimal" placeholder="مثال: 10"></label>
+  <label>العيار <select id="calc-karat"><option value='24'>عيار 24</option><option value='22'>عيار 22</option><option value='21' selected>عيار 21</option><option value='18'>عيار 18</option></select></label>
+  <label>المصنعية (ريال لكل جرام، اختياري) <input type="number" id="calc-making" min="0" step="0.1" value="0" inputmode="decimal"></label>
+  <output id="calc-result" aria-live="polite">أدخل الوزن لعرض القيمة</output>
+</section>
+
+<section>
+  <h2>كيف تعمل الحاسبة؟</h2>
+  <p>القيمة = الوزن × سعر جرام العيار اليوم. إذا أدخلت المصنعية تضاف لكل جرام، لتقريب السعر الذي قد تدفعه في المحل.</p>
+  <p>أسعار اليوم لكل جرام: عيار 24 = 524.34 · عيار 22 = 480.64 · عيار 21 = 458.80 · عيار 18 = 393.25 ريال.</p>
+</section>
+<script type="application/json" id="prices">{"gold_sar_g": 524.3379, "gold_bid_sar_g": 524.1601, "silver_sar_g": 7.7754, "karats": [24, 22, 21, 18], "updated": "2026-09-12 01:32", "zakat_rate": 0.025, "gold_nisab": [85, 92], "silver_nisab": [595]}</script>
+
+</main>
+<footer class="site">
+  <p><strong>آخر تحديث:</strong> <bdi dir="ltr">2026-09-12 01:32</bdi> بتوقيت الرياض · <strong>المصدر:</strong> Metals.Dev</p>
+  <p>الأسعار المعروضة أسعار السوق العالمية للذهب والفضة محوّلة إلى الريال السعودي، وليست أسعار المحلات. سعر المحل يشمل عادةً المصنعية وهامش الربح، وسعر شراء المحل للذهب المستعمل أقل من سعر السوق. المعلومات للاسترشاد فقط وليست نصيحة مالية.</p>
+</footer>
+
+<script src="/static/calc.js" defer></script>
+</body>
+</html>

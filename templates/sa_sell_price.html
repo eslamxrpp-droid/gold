@@ -1,0 +1,27 @@
+<h1>سعر بيع الذهب اليوم في السعودية</h1>
+<p class="updated">آخر تحديث: <bdi dir="ltr">{{updated}}</bdi> بتوقيت الرياض</p>
+
+<section>
+  <h2>سعر البيع والشراء في السوق حسب العيار</h2>
+  {{bid_ask_table}}
+  {{bid_note}}
+  <p><strong>سعر البيع</strong> هو السعر الذي يدفعه السوق لمن يبيع الذهب، و<strong>سعر الشراء</strong> هو السعر الذي يدفعه من يشتري. هذه أسعار السوق العالمية محوّلة إلى الريال؛ المحلات تشتري الذهب المستعمل عادةً بأقل من سعر البيع هنا.</p>
+</section>
+
+<section class="calc" id="sell-calc">
+  <h2>حاسبة بيع الذهب المستعمل</h2>
+  <label>الوزن (جرام) <input type="number" id="sell-weight" min="0" step="0.01" inputmode="decimal" placeholder="مثال: 20"></label>
+  <label>العيار <select id="sell-karat">{{karat_options}}</select></label>
+  <label>خصم المحل (%) — اسأل المحل عن نسبته <input type="number" id="sell-deduction" min="0" max="100" step="0.1" value="0" inputmode="decimal"></label>
+  <output id="sell-result" aria-live="polite">أدخل الوزن لعرض القيمة</output>
+</section>
+
+<section>
+  <h2>قبل أن تبيع ذهبك</h2>
+  <ul>
+    <li>اعرف الوزن الدقيق والعيار المختوم على القطعة.</li>
+    <li>قارن عرض أكثر من محل بالقيمة التقديرية أعلاه.</li>
+    <li>المصنعية التي دفعتها عند الشراء لا تُسترد غالبًا عند البيع.</li>
+  </ul>
+</section>
+<script type="application/json" id="prices">{{prices_json}}</script>

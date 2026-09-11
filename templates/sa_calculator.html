@@ -1,0 +1,16 @@
+<h1>حاسبة الذهب: احسب سعر ذهبك اليوم</h1>
+<p class="updated">الأسعار المستخدمة: آخر تحديث <bdi dir="ltr">{{updated}}</bdi> بتوقيت الرياض · عيار 21 = {{g21}} ريال/جرام</p>
+
+<section class="calc" id="value-calc">
+  <label>الوزن (جرام) <input type="number" id="calc-weight" min="0" step="0.01" inputmode="decimal" placeholder="مثال: 10"></label>
+  <label>العيار <select id="calc-karat">{{karat_options}}</select></label>
+  <label>المصنعية (ريال لكل جرام، اختياري) <input type="number" id="calc-making" min="0" step="0.1" value="0" inputmode="decimal"></label>
+  <output id="calc-result" aria-live="polite">أدخل الوزن لعرض القيمة</output>
+</section>
+
+<section>
+  <h2>كيف تعمل الحاسبة؟</h2>
+  <p>القيمة = الوزن × سعر جرام العيار اليوم. إذا أدخلت المصنعية تضاف لكل جرام، لتقريب السعر الذي قد تدفعه في المحل.</p>
+  <p>أسعار اليوم لكل جرام: عيار 24 = {{g24}} · عيار 22 = {{g22}} · عيار 21 = {{g21}} · عيار 18 = {{g18}} ريال.</p>
+</section>
+<script type="application/json" id="prices">{{prices_json}}</script>
