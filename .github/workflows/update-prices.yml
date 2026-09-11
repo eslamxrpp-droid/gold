@@ -1,0 +1,56 @@
+# Rebuilds the site with fresh prices and uploads it to Cloudflare Pages.
+# If the price fails a safety check, build.py exits with an error, the upload step is skipped,
+# and the pages already online stay as they are.
+name: Update prices
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # every 5 minutes (GitHub's fastest; runs can still be 5-30 min late at busy hours)
+  workflow_dispatch:               # lets you run it by hand from the Actions tab
+  push:
+    branches: [main]
+
+concurrency:
+  group: update-prices
+  cancel-in-progress: false
+
+permissions:
+  contents: write        # to commit the daily price history
+  deployments: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build the site
+        id: build
+        env:
+          METALS_API_KEY: ${{ secrets.METALS_API_KEY }}
+        run: python build.py --provider metals_dev
+
+      - name: Run tests
+        run: python -m unittest discover tests
+
+      - name: Save the price history (once a day)
+        if: steps.build.outputs.new_day == 'true'
+        run: |
+          git config user.name "price-bot"
+          git config user.email "price-bot@users.noreply.github.com"
+          git add data/history.json
+          git commit -m "price history $(date -u +%F)" || exit 0
+          git push
+
+      - name: Upload to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=${{ vars.CF_PAGES_PROJECT }} --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
