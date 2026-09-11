@@ -2,7 +2,7 @@
   "_comment": "Prototype settings. Domain and site name are placeholders until Eslam picks a domain.",
   "site_name_ar": "أسعار الذهب والفضة (اسم مؤقت)",
   "site_name_en": "Gold & Silver Prices (placeholder name)",
-  "base_url": "https://example.com",
+  "base_url": "https://mithqalprice.com",
   "noindex": true,
   "provider": "sample",
   "provider_api_key_env": "METALS_API_KEY",
