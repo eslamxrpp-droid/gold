@@ -142,3 +142,34 @@ class HistorySaving(unittest.TestCase):
                 self.assertFalse(build.save_history({}, hist))         # same day again
                 hist = hist + [{"date": "2026-09-12", "gold_usd_oz": 4370, "silver_usd_oz": 65}]
                 self.assertTrue(build.save_history({}, hist))          # next day
+
+
+class FrontPage(unittest.TestCase):
+    """The domain root must be a real page, not a redirect stub."""
+
+    @classmethod
+    def setUpClass(cls):
+        subprocess.check_output([sys.executable, str(ROOT / "build.py")], text=True)
+        cls.html = (ROOT / "dist" / "index.html").read_text(encoding="utf-8")
+        cls.sitemap = (ROOT / "dist" / "sitemap.xml").read_text(encoding="utf-8")
+
+    def test_is_a_real_page(self):
+        self.assertIn("<h1>", self.html)
+        self.assertNotIn("http-equiv", self.html)  # no meta refresh stub
+
+    def test_links_to_every_page(self):
+        for path in ("/sa/", "/sa/up-or-down/", "/sa/sell-price/", "/sa/calculator/",
+                     "/sa/zakat/", "/sa/silver/", "/sa/en/"):
+            self.assertIn(f'href="{path}"', self.html, path)
+
+    def test_canonical_and_sitemap(self):
+        cfg = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
+        base = cfg["base_url"].rstrip("/")
+        self.assertIn(f'<link rel="canonical" href="{base}/">', self.html)
+        self.assertIn(f"<loc>{base}/</loc>", self.sitemap)
+
+    def test_no_placeholder_brand(self):
+        cfg = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
+        self.assertNotIn("example.com", cfg["base_url"])
+        self.assertNotIn("مؤقت", cfg["site_name_ar"])
+        self.assertNotIn("placeholder", cfg["site_name_en"].lower())

@@ -304,7 +304,7 @@ def page(config, c, path, lang, title, description, body_template, ctx, alternat
         "description": html.escape(description), "canonical": base + path, "alternates": alt,
         "robots": "noindex, nofollow" if config["noindex"] else "index, follow",
         "site_name": config["site_name_ar"] if lang == "ar" else config["site_name_en"],
-        "home": "/sa/" if lang == "ar" else "/sa/en/",
+        "home": "/" if lang == "ar" else "/sa/en/",
         "nav": nav(NAV_AR if lang == "ar" else NAV_EN, path), "sample_banner": sample_banner, "content": body,
         "footer": render("footer_ar.html" if lang == "ar" else "footer_en.html",
                          {"updated": c["updated"], "source": html.escape(c["source"])}),
@@ -396,9 +396,12 @@ def build(config):
         s_chg_day=chg_ar(c["s_chg_day"]),
         nisab_silver=fmt(rules["silver_nisab_grams_pure"][0]["grams"] * c["silver"]))))
 
-    root = DIST / "index.html"
-    root.write_text("<!doctype html><meta charset='utf-8'><meta name='robots' content='noindex'>"
-                    "<meta http-equiv='refresh' content='0; url=/sa/'><a href='/sa/'>/sa/</a>", encoding="utf-8")
+    built.insert(0, page(config, c, "/", "ar",
+        f"أسعار الذهب والفضة اليوم في السعودية: جرام الذهب عيار 21 = {common['g21']} ريال",
+        "أسعار الذهب والفضة اليوم في السعودية بالريال: سعر جرام الذهب لكل عيار، سعر الفضة، حاسبة الذهب وحاسبة الزكاة. تحديث تلقائي.",
+        "home.html", dict(common, karat_table=karat_table_ar(c, config), silver_table=silver_table_ar(c, config),
+        direction_class=d, direction_arrow=arrow(d), direction_word=word_ar, chg_day=chg_ar(c["chg_day"]),
+        s_direction_class=sd, s_direction_arrow=arrow(sd), s_chg_day=chg_ar(c["s_chg_day"]))))
 
     (DIST / "static").mkdir(parents=True, exist_ok=True)
     for f in (HERE / "static").iterdir():

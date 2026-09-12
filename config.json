@@ -1,7 +1,7 @@
 {
-  "_comment": "Prototype settings. Domain and site name are placeholders until Eslam picks a domain.",
-  "site_name_ar": "أسعار الذهب والفضة (اسم مؤقت)",
-  "site_name_en": "Gold & Silver Prices (placeholder name)",
+  "_comment": "Live settings for mithqalprice.com. Set noindex=false on launch day.",
+  "site_name_ar": "مثقال · أسعار الذهب والفضة",
+  "site_name_en": "Mithqal · Gold & Silver Prices",
   "base_url": "https://mithqalprice.com",
   "noindex": true,
   "provider": "sample",
@@ -9,8 +9,16 @@
   "timezone_name": "Asia/Riyadh",
   "timezone_offset_hours": 3,
   "sar_per_usd_peg": 3.75,
-  "gold_karats": [24, 22, 21, 18],
-  "silver_purities": [999, 925],
+  "gold_karats": [
+    24,
+    22,
+    21,
+    18
+  ],
+  "silver_purities": [
+    999,
+    925
+  ],
   "history_days": 7,
   "max_price_age_minutes": 90
 }

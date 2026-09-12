@@ -1,0 +1,48 @@
+<h1>أسعار الذهب والفضة اليوم في السعودية</h1>
+<p class="lead">سعر جرام الذهب عيار 21 اليوم <strong>{{g21}} ريال</strong> · سعر جرام الفضة عيار 999 <strong>{{s999}} ريال</strong></p>
+<p class="updated">آخر تحديث: <bdi dir="ltr">{{updated}}</bdi> بتوقيت الرياض · يتحدّث تلقائيًا كل بضع دقائق</p>
+
+<section class="cards">
+  <a class="card" href="/sa/">
+    <strong>الذهب عيار 21</strong>
+    <span class="big">{{g21}} ريال للجرام</span>
+    <span class="{{direction_class}}">{{direction_arrow}} {{direction_word}} {{chg_day}} مقارنة بأمس</span>
+  </a>
+  <a class="card" href="/sa/silver/">
+    <strong>الفضة عيار 999</strong>
+    <span class="big">{{s999}} ريال للجرام</span>
+    <span class="{{s_direction_class}}">{{s_direction_arrow}} {{s_chg_day}} مقارنة بأمس</span>
+  </a>
+</section>
+
+<section>
+  <h2>أسعار الذهب اليوم حسب العيار</h2>
+  {{karat_table}}
+  <p><a href="/sa/">صفحة سعر الذهب اليوم: تغيّر الأسعار آخر 7 أيام ←</a></p>
+</section>
+
+<section>
+  <h2>أسعار الفضة اليوم</h2>
+  {{silver_table}}
+  <p><a href="/sa/silver/">صفحة سعر الفضة اليوم ←</a></p>
+</section>
+
+<section>
+  <h2>كل الصفحات</h2>
+  <div class="cards">
+    <a class="card" href="/sa/"><strong>سعر الذهب اليوم</strong><span>عيار 24 و22 و21 و18 بالريال، وتغيّر آخر 7 أيام</span></a>
+    <a class="card" href="/sa/up-or-down/"><strong>الذهب مرتفع ولا نازل؟</strong><span>التغير مقارنة بأمس وبالأسبوع الماضي لكل عيار</span></a>
+    <a class="card" href="/sa/sell-price/"><strong>سعر بيع الذهب</strong><span>سعر البيع والشراء وحاسبة الذهب المستعمل</span></a>
+    <a class="card" href="/sa/calculator/"><strong>حاسبة الذهب</strong><span>احسب قيمة ذهبك بالوزن والعيار</span></a>
+    <a class="card" href="/sa/zakat/"><strong>زكاة الذهب والفضة</strong><span>النصاب اليوم بالريال وحاسبة الزكاة مع المصادر</span></a>
+    <a class="card" href="/sa/silver/"><strong>سعر الفضة اليوم</strong><span>عيار 999 و925 للجرام والأونصة والكيلو</span></a>
+    <a class="card" dir="ltr" href="/sa/en/"><strong>Gold rate in Saudi Arabia</strong><span>English page: per gram, 10 g, tola, ounce, SAR / INR / PKR</span></a>
+  </div>
+</section>
+
+<section>
+  <h2>ما هذا الموقع؟</h2>
+  <p><strong>مثقال</strong> موقع يعرض سعر الذهب والفضة اليوم في السعودية بالريال، ويتحدّث تلقائيًا من السوق العالمية. والمِثقال هو وحدة الوزن القديمة التي كان يُوزن بها الذهب والفضة، ومنه يُحسب نصاب الزكاة.</p>
+  <p>الأسعار المعروضة هي سعر السوق العالمية محوّلًا إلى الريال (الريال مربوط بالدولار عند 3.75) ومقسومًا على وزن الأونصة (31.1035 جرام)، وليست أسعار المحلات. سعر المحل يشمل عادةً المصنعية وهامش الربح، وسعر شرائه للذهب المستعمل أقل من سعر السوق.</p>
+</section>
+<script type="application/json" id="prices">{{prices_json}}</script>

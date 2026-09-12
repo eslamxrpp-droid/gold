@@ -51,3 +51,4 @@ bdi { white-space: nowrap; }
   .prices th, .prices td { padding: 6px 5px; font-size: .9rem; }
 }
 .other-metal { display: block; margin-block: 12px; }
+.card .big { color: var(--fg); font-size: 1.45rem; font-weight: 800; font-variant-numeric: tabular-nums; margin-block: 2px; }
