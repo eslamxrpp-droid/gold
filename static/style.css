@@ -1,58 +1,166 @@
-:root {
-  --bg: #fbfaf7; --fg: #1d1b16; --muted: #6b665c; --line: #e4dfd3; --card: #fff;
-  --gold: #a87b12; --up: #147a3d; --down: #b3261e; --flat: #6b665c;
-  font-family: "Segoe UI", Tahoma, "Noto Sans Arabic", "Noto Sans", system-ui, sans-serif;
+/* ============================================================================
+   mithqalprice.com — visual identity, 2026-09-12 (session 08)
+   Direction: "A header + B body" — a dark branded header band over a light,
+   precise, financial-data body. Warm neutrals throughout so the gold header
+   and the page agree; gold is an accent, never a fill.
+   Typography: Tajawal, self-hosted (SIL OFL). No third-party font request.
+   ========================================================================== */
+
+/* ---------- fonts ---------- */
+/* Latin subset carries the digits, so Arabic pages load both. The English
+   page loads only the Latin files. unicode-range is what makes that true. */
+@font-face{font-family:Tajawal;font-style:normal;font-weight:400;font-display:swap;
+  src:url(tajawal-lat-400.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Tajawal;font-style:normal;font-weight:700;font-display:swap;
+  src:url(tajawal-lat-700.woff2) format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Tajawal;font-style:normal;font-weight:400;font-display:swap;
+  src:url(tajawal-ar-400.woff2) format("woff2");
+  unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:Tajawal;font-style:normal;font-weight:700;font-display:swap;
+  src:url(tajawal-ar-700.woff2) format("woff2");
+  unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+
+/* ---------- tokens ---------- */
+:root{
+  --bg:#fffefb;          /* page */
+  --panel:#f8f6f0;       /* calculators, quiet blocks */
+  --fg:#17130c;          /* warm near-black */
+  --muted:#6f6757;
+  --line:#e9e4d8;        /* warm hairline */
+  --line-strong:#cdc5b2;
+  --card:#fff;
+  --ink:#15120c;         /* header + footer band */
+  --ink-fg:#e7dcc2;
+  --ink-muted:#b0a68e;
+  --gold:#9a7418;        /* accent on light */
+  --gold-lt:#d9b95c;     /* accent on dark */
+  --gold-soft:#fbf5e6;
+  --up:#0b6b3c; --down:#b02a20; --flat:#6f6757;
+  --up-bg:#e9f5ee; --down-bg:#fbeceb; --flat-bg:#f2efe8;
+  --radius:10px;
+  font-family:Tajawal,"Segoe UI",Tahoma,"Noto Sans Arabic",system-ui,sans-serif;
 }
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--fg); line-height: 1.7; font-size: 17px; }
-main, header.site, footer.site { max-width: 860px; margin-inline: auto; padding-inline: 16px; }
-.sample { background: #fff3cd; color: #664d03; text-align: center; padding: 6px 16px; font-weight: 600; }
-header.site { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; padding-block: 14px; border-bottom: 1px solid var(--line); }
-.brand { font-weight: 700; color: var(--gold); text-decoration: none; font-size: 1.1rem; }
-header nav { display: flex; flex-wrap: wrap; gap: 4px 14px; }
-header nav a { color: var(--fg); text-decoration: none; font-size: .95rem; }
-header nav a[aria-current="page"] { color: var(--gold); font-weight: 700; }
-h1 { font-size: 1.7rem; line-height: 1.3; margin-block: 24px 8px; }
-h2 { font-size: 1.25rem; margin-block: 28px 10px; }
-h3 { font-size: 1.05rem; margin-block: 18px 6px; }
-.lead { font-size: 1.15rem; margin-block: 6px; }
-.updated, .note { color: var(--muted); font-size: .92rem; }
-.note.important { background: #f3efe4; border-inline-start: 4px solid var(--gold); padding: 8px 12px; color: var(--fg); }
-.up { color: var(--up); } .down { color: var(--down); } .flat { color: var(--flat); }
-table.prices { width: 100%; border-collapse: collapse; background: var(--card); font-variant-numeric: tabular-nums; }
-.prices th, .prices td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: start; }
-.prices thead th { background: #f3efe4; font-size: .9rem; }
-section { overflow-x: auto; }
-.verdict { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; margin-block: 12px; }
-.verdict .big { font-size: 2rem; font-weight: 800; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-block: 24px; }
-.card { display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; color: var(--fg); text-decoration: none; }
-.card strong { color: var(--gold); }
-.card span { color: var(--muted); font-size: .92rem; }
-.other-metal { background: var(--card); border: 1px dashed var(--line); padding: 10px 14px; border-radius: 8px; }
-.calc { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-block: 20px; }
-.calc label { display: block; margin-block: 8px; font-weight: 600; }
-.calc label.inline { display: inline-block; font-weight: 400; margin-inline-end: 16px; }
-.calc input[type=number], .calc select { display: block; width: 100%; max-width: 320px; padding: 8px 10px; font-size: 1rem; border: 1px solid #cfc8b8; border-radius: 6px; margin-top: 4px; background: #fff; }
-.calc .row { display: flex; flex-wrap: wrap; gap: 0 16px; }
-.calc .row label { flex: 1 1 180px; }
-.calc fieldset { border: 1px solid var(--line); border-radius: 8px; margin-block: 12px; }
-.calc button { padding: 6px 12px; font-size: .95rem; border: 1px solid var(--gold); color: var(--gold); background: #fff; border-radius: 6px; cursor: pointer; }
-.calc output { display: block; margin-top: 12px; padding: 12px; background: #f3efe4; border-radius: 8px; font-size: 1.05rem; }
-.calc output table { width: 100%; border-collapse: collapse; margin-top: 6px; }
-.calc output td, .calc output th { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: start; }
-.sources { font-size: .92rem; }
-footer.site { border-top: 1px solid var(--line); margin-top: 40px; padding-block: 16px 32px; color: var(--muted); font-size: .88rem; }
-.prices th, .prices td { white-space: nowrap; }
-/* Row labels can be full sentences (zakat nisab); let them wrap so the value column
-   stays on screen at phone width. Numeric cells keep nowrap. */
-.prices tbody th { white-space: normal; min-width: 9em; }
-.prices thead th { white-space: normal; }
-bdi { white-space: nowrap; }
-@media (max-width: 480px) {
-  body { font-size: 16px; }
-  .prices th, .prices td { padding: 6px 5px; font-size: .9rem; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);line-height:1.75;font-size:17px;
+  -webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
+main{max-width:900px;margin-inline:auto;padding-inline:20px}
+a{color:var(--gold)}
+a:hover{color:#6f5310}
+
+/* ---------- notices (kept loud on purpose) ---------- */
+.sample{background:#fff3cd;color:#664d03;text-align:center;padding:6px 16px;font-weight:700}
+.stale{background:#fdecea;color:#8a1c13;border-bottom:1px solid #f3c4bf;text-align:center;padding:8px 16px;font-weight:700}
+
+/* ---------- header band ---------- */
+header.site{display:block;max-width:none;margin:0;padding:0;border:0;background:var(--ink);position:relative}
+header.site::after{content:"";display:block;height:2px;
+  background:linear-gradient(90deg,#4a3a10,var(--gold-lt) 45%,#4a3a10)}
+.brand,header.site nav{max-width:900px;margin-inline:auto;padding-inline:20px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--ink-fg);font-weight:700;
+  font-size:1.22rem;text-decoration:none;padding-block:16px 8px;letter-spacing:.1px}
+.brand:hover{color:#f3e6c8}
+.brand::before{content:"";width:26px;height:26px;flex:0 0 26px;
+  background:no-repeat center/contain url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d9b95c' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><path d='M12 4v15'/><path d='M7.5 19h9'/><path d='M4 8h16'/><circle cx='12' cy='5.6' r='1.5' fill='%23d9b95c' stroke='none'/><path d='M4 8 1.4 13.6h5.2z'/><path d='M20 8l2.6 5.6h-5.2z'/></svg>")}
+header.site nav{display:flex;flex-wrap:wrap;gap:0 2px;padding-block:0 2px}
+header.site nav a{color:var(--ink-muted);text-decoration:none;font-size:.92rem;
+  padding:6px 10px 10px;border-bottom:2px solid transparent}
+header.site nav a:hover{color:#f0e4c6}
+header.site nav a[aria-current="page"]{color:var(--gold-lt);font-weight:700;border-bottom-color:var(--gold-lt)}
+
+/* ---------- type ---------- */
+h1{font-size:1.78rem;line-height:1.4;margin-block:28px 10px;font-weight:700;letter-spacing:-.2px}
+h2{font-size:1.2rem;margin-block:34px 12px;font-weight:700;padding-bottom:8px;border-bottom:1px solid var(--line)}
+h3{font-size:1.02rem;margin-block:20px 6px;font-weight:700}
+.lead{font-size:1.1rem;color:#3a3325;margin-block:8px}
+.lead strong{color:var(--fg)}
+.updated,.note{color:var(--muted);font-size:.9rem}
+.note.important{background:var(--gold-soft);border:1px solid #efe3c4;border-radius:var(--radius);
+  padding:11px 15px;color:#4a3a12}
+.up{color:var(--up)}.down{color:var(--down)}.flat{color:var(--flat)}
+.sources{font-size:.9rem}
+
+/* ---------- price cards ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:12px;margin-block:22px}
+.card{display:flex;flex-direction:column;align-items:flex-start;background:var(--card);
+  border:1px solid var(--line);border-radius:var(--radius);padding:15px 17px;color:var(--fg);
+  text-decoration:none;transition:border-color .15s,box-shadow .15s,transform .15s}
+.card:hover{border-color:var(--line-strong);box-shadow:0 3px 14px rgba(60,45,10,.07)}
+.card strong{color:var(--fg);font-weight:700;font-size:.95rem}
+.card span{color:var(--muted);font-size:.89rem}
+.card .big{color:var(--fg);font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums;
+  letter-spacing:-.8px;line-height:1.15;margin-block:6px 8px}
+/* a card that carries a price is the product, not a link: mark it with a gold
+   top rule so it separates from the plain navigation cards below it.
+   :has() is unsupported on old browsers - they just see a plain card. */
+.card:has(.big){position:relative;overflow:hidden}
+.card:has(.big)::before{content:"";position:absolute;inset-block-start:0;inset-inline:0;height:3px;
+  background:linear-gradient(90deg,var(--gold-lt),var(--gold))}
+/* the change line inside a price card becomes a chip */
+.card>span.up,.card>span.down,.card>span.flat{
+  display:inline-block;padding:2px 10px;border-radius:999px;font-size:.85rem;font-weight:700}
+.card>span.up{background:var(--up-bg);color:var(--up)}
+.card>span.down{background:var(--down-bg);color:var(--down)}
+.card>span.flat{background:var(--flat-bg);color:var(--flat)}
+
+/* ---------- verdict block (up-or-down page) ---------- */
+.verdict{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;background:var(--panel);
+  border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin-block:14px}
+.verdict .big{font-size:2.2rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.8px}
+
+/* ---------- tables ---------- */
+table.prices{width:100%;border-collapse:collapse;background:transparent;font-variant-numeric:tabular-nums}
+.prices th,.prices td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:start}
+.prices thead th{background:transparent;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);font-weight:700;border-bottom:1px solid var(--line-strong)}
+.prices tbody th{font-weight:700;white-space:normal;min-width:9em}
+.prices tbody tr:nth-child(even){background:#fbfaf6}
+.prices td{font-size:1.03rem}
+.prices th,.prices td{white-space:nowrap}
+.prices tbody th,.prices thead th{white-space:normal}
+section{overflow-x:auto}
+bdi{white-space:nowrap}
+
+.other-metal{display:block;background:var(--panel);border:1px solid var(--line);
+  padding:12px 16px;border-radius:var(--radius);margin-block:12px}
+
+/* ---------- calculators ---------- */
+.calc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-block:22px}
+.calc label{display:block;margin-block:8px;font-weight:700}
+.calc label.inline{display:inline-block;font-weight:400;margin-inline-end:16px}
+.calc input[type=number],.calc select{display:block;width:100%;max-width:320px;padding:9px 11px;
+  font:inherit;font-size:1rem;border:1px solid var(--line-strong);border-radius:8px;margin-top:4px;background:#fff}
+.calc input[type=number]:focus,.calc select:focus{outline:2px solid var(--gold);outline-offset:1px}
+.calc .row{display:flex;flex-wrap:wrap;gap:0 16px}
+.calc .row label{flex:1 1 180px}
+.calc fieldset{border:1px solid var(--line);border-radius:10px;margin-block:12px;background:#fff}
+.calc button{padding:9px 18px;font:inherit;font-size:.95rem;font-weight:700;border:0;color:#fff;
+  background:var(--ink);border-radius:8px;cursor:pointer}
+.calc button:hover{background:#2a2314}
+.calc output{display:block;margin-top:12px;padding:14px;background:#fff;border:1px solid var(--line);
+  border-radius:10px;font-size:1.04rem}
+.calc output table{width:100%;border-collapse:collapse;margin-top:6px}
+.calc output td,.calc output th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:start}
+
+/* ---------- footer band ---------- */
+footer.site{display:block;max-width:none;margin:48px 0 0;padding:0;border:0;
+  background:var(--ink);color:var(--ink-muted);font-size:.87rem}
+footer.site::before{content:"";display:block;height:2px;
+  background:linear-gradient(90deg,#4a3a10,var(--gold-lt) 45%,#4a3a10)}
+footer.site>*{max-width:900px;margin-inline:auto;padding-inline:20px}
+footer.site>*:first-of-type{padding-top:22px}
+footer.site>*:last-child{padding-bottom:34px}
+footer.site strong{color:#d9c99c}
+footer.site a{color:var(--gold-lt)}
+
+/* ---------- narrow screens ---------- */
+@media(max-width:480px){
+  body{font-size:16px}
+  h1{font-size:1.5rem}
+  .prices th,.prices td{padding:8px 6px;font-size:.9rem}
+  .card .big{font-size:1.7rem}
+  .brand{font-size:1.1rem}
+  header.site nav a{font-size:.88rem;padding:6px 8px 9px}
 }
-.other-metal { display: block; margin-block: 12px; }
-.card .big { color: var(--fg); font-size: 1.45rem; font-weight: 800; font-variant-numeric: tabular-nums; margin-block: 2px; }
-.stale { background: #fdecea; color: #8a1c13; border-bottom: 1px solid #f3c4bf; text-align: center; padding: 8px 16px; font-weight: 600; }
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
