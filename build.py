@@ -345,8 +345,8 @@ def build(config):
     alt_sa = [("ar-SA", "/sa/"), ("en-SA", "/sa/en/")]
     built = []
 
-    built.append(page(config, c, "/sa/", "ar", f"سعر الذهب اليوم في السعودية: عيار 21 = {common['g21']} ريال",
-        "سعر جرام الذهب اليوم في السعودية لعيار 24 و22 و21 و18 بالريال السعودي، مع تغير الأسعار آخر 7 أيام.",
+    built.append(page(config, c, "/sa/", "ar", f"سعر الذهب في السعودية اليوم: جرام عيار 21 = {common['g21']} ريال",
+        "كم سعر الذهب اليوم في السعودية؟ سعر جرام الذهب لعيار 24 و22 و21 و18 بالريال السعودي، مع تغير الأسعار آخر 7 أيام.",
         "sa_index.html", dict(common, karat_table=karat_table_ar(c, config), history_table=history_table_ar(c),
         direction_class=d, direction_arrow=arrow(d), direction_word=word_ar, chg_day=chg_ar(c["chg_day"])), alt_sa))
 
@@ -357,8 +357,8 @@ def build(config):
         history_table=history_table_ar(c), prev_date=ltr(c["prev"]["date"]), week_date=ltr(c["week"]["date"]))))
 
     bid_note = "" if c["has_bid_ask"] else "<p class='note'>مصدر البيانات الحالي لا يوفر سعري البيع والشراء، فالجدول يعرض السعر الفوري نفسه في العمودين.</p>"
-    built.append(page(config, c, "/sa/sell-price/", "ar", "سعر بيع الذهب اليوم في السعودية وحاسبة بيع الذهب المستعمل",
-        "سعر بيع وشراء الذهب اليوم في السعودية لكل عيار، وحاسبة تقدّر قيمة ذهبك المستعمل قبل البيع.",
+    built.append(page(config, c, "/sa/sell-price/", "ar", "سعر الذهب اليوم في السعودية بيع وشراء لكل عيار",
+        "كم سعر جرام الذهب اليوم في السعودية بيع وشراء؟ الأسعار لكل عيار، وحاسبة تقدّر قيمة ذهبك المستعمل قبل البيع.",
         "sa_sell_price.html", dict(common, bid_ask_table=bid_ask_table_ar(c, config), bid_note=bid_note)))
 
     built.append(page(config, c, "/sa/calculator/", "ar", "حاسبة الذهب: احسب سعر الذهب اليوم بالوزن والعيار",
@@ -367,8 +367,8 @@ def build(config):
 
     j = {o["id"]: o for o in rules["jewelry_opinions"]}
     gn = rules["gold_nisab_grams_pure"]
-    built.append(page(config, c, "/sa/zakat/", "ar", "حاسبة زكاة الذهب والفضة ونصاب الذهب اليوم بالريال",
-        "احسب زكاة الذهب والفضة: نصاب الذهب والفضة اليوم بالريال السعودي، مع ذكر أقوال العلماء ومصادرها.",
+    built.append(page(config, c, "/sa/zakat/", "ar", "حاسبة زكاة الذهب: كم نصاب زكاة الذهب اليوم بالريال؟",
+        "حساب زكاة الذهب والفضة: النصاب اليوم بالريال السعودي، ومتى تجب الزكاة، وهل الذهب الملبوس عليه زكاة — بأقوال أهل العلم ومصادرها.",
         "sa_zakat.html", dict(common,
         nisab_gold_85=fmt(gn[0]["grams"] * c["gold"]), nisab_gold_92=fmt(gn[1]["grams"] * c["gold"]),
         nisab_gold_85_label=gn[0]["label_ar"], nisab_gold_92_label=gn[1]["label_ar"],
@@ -378,26 +378,27 @@ def build(config):
         nisab_silver_refs=src_refs(rules, rules["silver_nisab_grams_pure"][0]["sources"]),
         silver_note=rules["silver_nisab_note_ar"], silver_note_refs=src_refs(rules, ["ibnbaz_18047"]),
         rate_text=rules["rate"]["text_ar"], rate_refs=src_refs(rules, rules["rate"]["sources"]),
+        rate_refs2=src_refs(rules, rules["rate"]["sources"]),
         karat_rule=rules["karat_rule_ar"], karat_rule_refs=src_refs(rules, rules["karat_rule_sources"]),
         opinion_must=j["must_pay"]["text_ar"], opinion_must_refs=src_refs(rules, j["must_pay"]["sources"]),
         opinion_exempt=j["exempt"]["text_ar"], opinion_exempt_refs=src_refs(rules, j["exempt"]["sources"]),
         sources=sources_list(rules), reviewed=rules["reviewed"])))
 
-    built.append(page(config, c, "/sa/en/", "en", f"Gold Rate in Saudi Arabia Today: 22K = SAR {common['g22']}/g",
-        "Today's gold rate in Saudi Arabia per gram for 24K, 22K, 21K and 18K, 1 tola and 10 grams, in SAR, INR and PKR, plus the silver price.",
+    built.append(page(config, c, "/sa/en/", "en", f"Today Gold Rate in Saudi Arabia (KSA): 24K = SAR {common['g24']}/g",
+        "Today gold rate in Saudi Arabia (KSA) per gram for 24k, 22k, 21k and 18k, 1 tola and 10 grams, in SAR, INR and PKR, plus the silver price.",
         "sa_en.html", dict(common, gram_table=en_gram_table(c, config), fx_section=en_fx_section(c),
         silver_table=en_silver_table(c, config), history_table=en_history_table(c),
         s_chg_day=chg_en(c["s_chg_day"]), chg_day=chg_en(c["chg_day"])), alt_sa))
 
-    built.append(page(config, c, "/sa/silver/", "ar", f"سعر الفضة اليوم في السعودية: الجرام عيار 999 = {common['s999']} ريال",
-        "سعر جرام الفضة اليوم في السعودية لعيار 999 و925، وسعر أونصة وكيلو الفضة بالريال، مع تغير السعر آخر 7 أيام.",
+    built.append(page(config, c, "/sa/silver/", "ar", f"سعر الفضة اليوم: جرام الفضة في السعودية = {common['s999']} ريال",
+        "كم سعر الفضة اليوم؟ سعر جرام الفضة عيار 999 و925 في السعودية، وسعر الأونصة والكيلو بالريال، مع تغير السعر آخر 7 أيام.",
         "sa_silver.html", dict(common, silver_table=silver_table_ar(c, config), silver_history_table=silver_history_table_ar(c),
         s925=fmt(P.silver_purity_price(c["silver"], 925)), s_direction_class=sd, s_direction_arrow=arrow(sd),
         s_chg_day=chg_ar(c["s_chg_day"]),
         nisab_silver=fmt(rules["silver_nisab_grams_pure"][0]["grams"] * c["silver"]))))
 
     built.insert(0, page(config, c, "/", "ar",
-        f"أسعار الذهب والفضة اليوم في السعودية: جرام الذهب عيار 21 = {common['g21']} ريال",
+        f"أسعار الذهب والفضة اليوم في السعودية: عيار 21 = {common['g21']} ريال",
         "أسعار الذهب والفضة اليوم في السعودية بالريال: سعر جرام الذهب لكل عيار، سعر الفضة، حاسبة الذهب وحاسبة الزكاة. تحديث تلقائي.",
         "home.html", dict(common, karat_table=karat_table_ar(c, config), silver_table=silver_table_ar(c, config),
         direction_class=d, direction_arrow=arrow(d), direction_word=word_ar, chg_day=chg_ar(c["chg_day"]),
