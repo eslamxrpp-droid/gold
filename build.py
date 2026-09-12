@@ -142,6 +142,7 @@ def compute(config, latest, history):
         "chg_day": P.pct_change(g, prev["gold_sar_g"]), "chg_week": P.pct_change(g, week["gold_sar_g"]),
         "s_chg_day": P.pct_change(s, prev["silver_sar_g"]),
         "updated": ts.strftime("%Y-%m-%d %H:%M"),  # wrapped with ltr() where shown in Arabic
+        "updated_utc": ts.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "fx": latest["fx_per_usd"], "is_sample": latest["is_sample"], "source": latest["source_name"],
     }
 
@@ -328,6 +329,9 @@ def build(config):
     prices_json = json.dumps({
         "gold_sar_g": round(c["gold"], 4), "gold_bid_sar_g": round(c["gold_bid"], 4),
         "silver_sar_g": round(c["silver"], 4), "karats": config["gold_karats"], "updated": c["updated"],
+        # Absolute time + threshold so the page can flag itself as stale in the visitor's
+        # browser. This is the one check that still works when the build is failing.
+        "updated_utc": c["updated_utc"], "stale_after_minutes": config.get("stale_after_minutes", 120),
         "zakat_rate": rules["rate"]["value"],
         "gold_nisab": [n["grams"] for n in rules["gold_nisab_grams_pure"]],
         "silver_nisab": [n["grams"] for n in rules["silver_nisab_grams_pure"]],
