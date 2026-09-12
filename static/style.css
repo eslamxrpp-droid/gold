@@ -44,6 +44,9 @@ section { overflow-x: auto; }
 .sources { font-size: .92rem; }
 footer.site { border-top: 1px solid var(--line); margin-top: 40px; padding-block: 16px 32px; color: var(--muted); font-size: .88rem; }
 .prices th, .prices td { white-space: nowrap; }
+/* Row labels can be full sentences (zakat nisab); let them wrap so the value column
+   stays on screen at phone width. Numeric cells keep nowrap. */
+.prices tbody th { white-space: normal; min-width: 9em; }
 .prices thead th { white-space: normal; }
 bdi { white-space: nowrap; }
 @media (max-width: 480px) {
