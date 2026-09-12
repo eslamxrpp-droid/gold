@@ -292,3 +292,34 @@ class StaleNotice(unittest.TestCase):
             data = json.loads(re.search(r'id="prices">(.*?)</script>', html, re.S).group(1))
             self.assertRegex(data["updated_utc"], r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
             self.assertGreater(data["stale_after_minutes"], 0)
+
+
+class AssetCacheBusting(unittest.TestCase):
+    """Cloudflare and browsers cache /static/* hard. Without a version in the URL a
+    returning visitor keeps the previous deploy's CSS and JS — on 2026-09-12 the live
+    pages were still running the old calc.js, which disabled the stale-price notice."""
+
+    def test_every_page_versions_its_assets(self):
+        import re
+        for page in ("index.html", "sa/index.html", "sa/en/index.html", "sa/zakat/index.html"):
+            html = (ROOT / "dist" / page).read_text(encoding="utf-8")
+            self.assertRegex(html, r'href="/static/style\.css\?v=[0-9a-f]{8}"', page)
+            self.assertRegex(html, r'src="/static/calc\.js\?v=[0-9a-f]{8}"', page)
+            self.assertNotIn('href="/static/style.css"', html, page)   # bare, cacheable URL
+            self.assertNotIn('src="/static/calc.js"', html, page)
+
+    def test_version_follows_the_file_contents(self):
+        import importlib, shutil, tempfile
+        build_mod = importlib.import_module("build")
+        before = build_mod.static_url("calc.js")
+        path = ROOT / "static" / "calc.js"
+        original = path.read_bytes()
+        backup = Path(tempfile.mkdtemp()) / "calc.js"
+        shutil.copy2(path, backup)
+        try:
+            path.write_bytes(original + b"\n// touched\n")
+            self.assertNotEqual(build_mod.static_url("calc.js"), before)
+        finally:
+            shutil.copy2(backup, path)
+            shutil.rmtree(backup.parent, ignore_errors=True)
+        self.assertEqual(build_mod.static_url("calc.js"), before)
