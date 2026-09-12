@@ -323,3 +323,50 @@ class AssetCacheBusting(unittest.TestCase):
             shutil.copy2(backup, path)
             shutil.rmtree(backup.parent, ignore_errors=True)
         self.assertEqual(build_mod.static_url("calc.js"), before)
+
+
+class VisualIdentity(unittest.TestCase):
+    """Session 08. The identity has two parts a build can silently lose: the
+    self-hosted font files (a missing one would fall back to the device font and
+    undo the whole look) and the third-party-free promise (a font pulled from
+    Google would add a request outside our own domain, which we said we'd avoid)."""
+
+    FONTS = ("tajawal-ar-400.woff2", "tajawal-ar-700.woff2",
+             "tajawal-lat-400.woff2", "tajawal-lat-700.woff2")
+
+    @classmethod
+    def setUpClass(cls):
+        cls.css = (ROOT / "static" / "style.css").read_text(encoding="utf-8")
+
+    def test_font_files_are_present_and_published(self):
+        for f in self.FONTS:
+            src = ROOT / "static" / f
+            self.assertTrue(src.exists(), f"missing {f} in static/")
+            self.assertGreater(src.stat().st_size, 4000, f)
+            self.assertTrue((ROOT / "dist" / "static" / f).exists(), f"{f} not copied into dist/")
+
+    def test_css_references_every_font_file(self):
+        for f in self.FONTS:
+            self.assertIn(f, self.css, f"style.css never loads {f}")
+
+    def test_no_third_party_font_request(self):
+        for host in ("fonts.googleapis.com", "fonts.gstatic.com", "//", "http:"):
+            self.assertNotIn(host, self.css.split("/* ---------- tokens")[0],
+                             f"font block reaches outside our domain: {host}")
+
+    def test_arabic_and_latin_are_split_by_unicode_range(self):
+        # Without unicode-range the English page would download the Arabic files too.
+        self.assertEqual(self.css.count("unicode-range:"), 4)
+        self.assertIn("U+0600-06FF", self.css)
+
+    def test_pages_carry_the_icon_and_theme_colour(self):
+        for page in ("index.html", "sa/index.html", "sa/en/index.html"):
+            html = (ROOT / "dist" / page).read_text(encoding="utf-8")
+            self.assertIn('href="/static/icon.svg"', html, page)
+            self.assertIn('name="theme-color"', html, page)
+        for asset in ("icon.svg", "icon-192.png", "apple-touch-icon.png"):
+            self.assertTrue((ROOT / "dist" / "static" / asset).exists(), asset)
+
+    def test_font_licence_ships_with_the_fonts(self):
+        # SIL OFL requires the licence to travel with the font files.
+        self.assertTrue((ROOT / "dist" / "static" / "TAJAWAL-OFL.txt").exists())
