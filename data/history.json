@@ -45,7 +45,17 @@
   "silver_usd_oz": 63.5805
  },
  {
+  "date": "2026-09-11",
+  "gold_usd_oz": 4349.42,
+  "silver_usd_oz": 64.5
+ },
+ {
   "date": "2026-09-12",
+  "gold_usd_oz": 4348.995,
+  "silver_usd_oz": 64.4915
+ },
+ {
+  "date": "2026-09-13",
   "gold_usd_oz": 4348.995,
   "silver_usd_oz": 64.4915
  }
