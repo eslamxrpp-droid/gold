@@ -251,3 +251,44 @@ class ErrorMessages(unittest.TestCase):
         self.assertIn("Monthly quota exceeded", msg)   # the real reason, from the response body
         self.assertIn("quota", msg)                     # our hint for 400/402/429
         self.assertNotIn("SECRETKEY", msg)              # public repo: never log the key
+
+
+class StaleNotice(unittest.TestCase):
+    """The build refuses to publish a bad price, so a broken feed leaves the last good
+    page online saying 'last updated ...' as if it were current. On 2026-09-12 that
+    served a 7-hour-old price for 7 hours. This check runs in the visitor's browser, so
+    it still works while the build is down."""
+
+    def js(self, expr):
+        script = f'const M = require({json.dumps(str(ROOT / "static" / "calc.js"))});\nconsole.log(JSON.stringify({expr}));'
+        return json.loads(subprocess.check_output(["node", "-e", script], text=True))
+
+    def test_age_and_threshold(self):
+        now = "Date.parse('2026-09-12T14:00:00Z')"
+        self.assertEqual(self.js(f"M.ageMinutes('2026-09-12T11:00:00Z', {now})"), 180)
+        self.assertTrue(self.js(f"M.isStale('2026-09-12T11:00:00Z', {now}, 120)"))
+        self.assertFalse(self.js(f"M.isStale('2026-09-12T13:00:00Z', {now}, 120)"))
+
+    def test_unparseable_timestamp_never_cries_wolf(self):
+        now = "Date.parse('2026-09-12T14:00:00Z')"
+        self.assertIsNone(self.js(f"M.ageMinutes('', {now})"))
+        self.assertFalse(self.js(f"M.isStale('nonsense', {now}, 120)"))
+
+    def test_arabic_counted_nouns(self):
+        # Arabic counts: 2 is dual, 3-10 plural, 11+ back to singular. Getting this
+        # wrong on an Arabic site reads as careless.
+        cases = {60: "ساعة", 120: "ساعتين", 180: "3 ساعات", 660: "11 ساعة",
+                 1440: "يوم", 2880: "يومين", 4320: "3 أيام", 20160: "14 يومًا"}
+        for minutes, want in cases.items():
+            self.assertEqual(self.js(f"M.humanAge({minutes}, 'ar')"), want, minutes)
+        self.assertEqual(self.js("M.humanAge(60, 'en')"), "1 hour")
+        self.assertEqual(self.js("M.humanAge(180, 'en')"), "3 hours")
+
+    def test_pages_carry_what_the_browser_needs(self):
+        import re
+        for page in ("index.html", "sa/index.html", "sa/en/index.html", "sa/silver/index.html"):
+            html = (ROOT / "dist" / page).read_text(encoding="utf-8")
+            self.assertIn('id="stale-notice"', html, page)
+            data = json.loads(re.search(r'id="prices">(.*?)</script>', html, re.S).group(1))
+            self.assertRegex(data["updated_utc"], r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+            self.assertGreater(data["stale_after_minutes"], 0)
