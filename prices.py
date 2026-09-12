@@ -24,11 +24,55 @@ def silver_purity_price(pure_per_gram: float, purity: int) -> float:
     return pure_per_gram * purity / 1000
 
 
+# The weekend pause in global metals trading. These two hours are an ASSUMPTION about when
+# our feed stops moving, checked against observed behaviour, not a published exchange
+# calendar - we have not validated one, and we do not claim to. They are deliberately
+# generous, and holidays are not modelled at all: a holiday simply looks like a market that
+# has not printed for a while, which the last-session rule below handles.
+WEEK_CLOSE_WEEKDAY, WEEK_CLOSE_HOUR = 4, 21   # Friday 21:00 UTC
+WEEK_OPEN_WEEKDAY, WEEK_OPEN_HOUR = 6, 22     # Sunday 22:00 UTC
+
+
 def market_closed(now_utc) -> bool:
-    """Global gold/silver trading pauses from Friday ~21:00 UTC to Sunday ~22:00 UTC.
-    During that window a price feed's timestamp stays at Friday's close, so the build must not treat it as stale."""
+    """True inside the assumed weekend pause. During it a feed's timestamp stays at Friday's
+    close, so an unchanged timestamp is correct behaviour rather than a stale feed."""
     wd, h = now_utc.weekday(), now_utc.hour  # Monday = 0 ... Friday = 4, Saturday = 5, Sunday = 6
-    return (wd == 4 and h >= 21) or wd == 5 or (wd == 6 and h < 22)
+    return ((wd == WEEK_CLOSE_WEEKDAY and h >= WEEK_CLOSE_HOUR) or wd == 5
+            or (wd == WEEK_OPEN_WEEKDAY and h < WEEK_OPEN_HOUR))
+
+
+def last_session_close(now_utc):
+    """The most recent assumed weekly close at or before `now_utc`.
+
+    This is what makes the weekend rule bounded. The old check simply skipped the age test
+    while the market was closed, so a feed that died on Wednesday would sail through the
+    whole weekend unnoticed. Now the question is not "how old is this price?" but "is it as
+    old as the last close, or older than it should be?" - which a dead feed fails and a
+    genuine weekend passes.
+    """
+    from datetime import timedelta
+    d = now_utc
+    while True:
+        if d.weekday() == WEEK_CLOSE_WEEKDAY:
+            close = d.replace(hour=WEEK_CLOSE_HOUR, minute=0, second=0, microsecond=0)
+            if close <= now_utc:
+                return close
+        d = (d - timedelta(days=1)).replace(hour=23, minute=59, second=59, microsecond=0)
+
+
+def quote_age_limit_minutes(now_utc, config):
+    """How old the newest quote may be before the build refuses to publish.
+
+    Open market: `max_price_age_minutes`.
+    Closed market: the same allowance measured from the last close, not from now - so the
+    limit grows through the weekend exactly as fast as a correctly-frozen feed ages, and no
+    faster.
+    """
+    limit = config["max_price_age_minutes"]
+    if not market_closed(now_utc):
+        return limit
+    since_close = (now_utc - last_session_close(now_utc)).total_seconds() / 60
+    return limit + max(0.0, since_close)
 
 
 def pct_change(new: float, old: float) -> float:

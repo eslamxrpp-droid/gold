@@ -1,5 +1,5 @@
 {
-  "_comment": "Live settings for mithqalprice.com. Set noindex=false on launch day. bid_ask_metals drives the API request budget - see DEPLOY.md.",
+  "_comment": "Live settings for mithqalprice.com. bid_ask_metals drives the API request budget - see DEPLOY.md. Validation limits live here so changing one is a visible, reviewable decision.",
   "site_name_ar": "مثقال · أسعار الذهب والفضة",
   "site_name_en": "Mithqal · Gold & Silver Prices",
   "base_url": "https://mithqalprice.com",
@@ -24,5 +24,28 @@
   ],
   "history_days": 7,
   "max_price_age_minutes": 90,
-  "stale_after_minutes": 120
+  "stale_after_minutes": 120,
+  "plausible_usd_oz": {
+    "gold": [
+      500,
+      20000
+    ],
+    "silver": [
+      5,
+      500
+    ]
+  },
+  "max_daily_move_pct": 10,
+  "sar_peg_tolerance": 0.05,
+  "public_snapshot_path": "/data/prices.json",
+  "analytics": {
+    "provider": "none",
+    "_options": [
+      "none",
+      "plausible",
+      "ga4"
+    ],
+    "domain": "",
+    "measurement_id": ""
+  }
 }
