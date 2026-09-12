@@ -23,5 +23,6 @@
     925
   ],
   "history_days": 7,
-  "max_price_age_minutes": 90
+  "max_price_age_minutes": 90,
+  "stale_after_minutes": 120
 }
