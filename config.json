@@ -3,8 +3,8 @@
   "site_name_ar": "مثقال · أسعار الذهب والفضة",
   "site_name_en": "Mithqal · Gold & Silver Prices",
   "base_url": "https://mithqalprice.com",
-  "noindex": true,
-  "provider": "sample",
+  "noindex": false,
+  "provider": "metals_dev",
   "provider_api_key_env": "METALS_API_KEY",
   "bid_ask_metals": [
     "gold"
