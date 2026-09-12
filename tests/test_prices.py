@@ -189,3 +189,65 @@ class FrontPage(unittest.TestCase):
         self.assertNotIn("example.com", cfg["base_url"])
         self.assertNotIn("مؤقت", cfg["site_name_ar"])
         self.assertNotIn("placeholder", cfg["site_name_en"].lower())
+
+
+class RequestBudget(unittest.TestCase):
+    """Every API call here is multiplied by ~2,900 builds a month, so the number of
+    requests per build is a cost decision, not a detail. Metals.Dev meters per request."""
+
+    CFG = {"provider_api_key_env": "METALS_API_KEY", "sar_per_usd_peg": 3.75}
+
+    def _fake(self, calls):
+        def _get(url, timeout=20):
+            calls.append(url)
+            if "/v1/latest" in url:
+                return {"status": "success", "timestamps": {"metal": "2026-09-12T10:00:00Z"},
+                        "metals": {"gold": 4362.0, "silver": 64.4},
+                        "currencies": {"SAR": 1 / 3.75, "INR": 1 / 88.0, "PKR": 1 / 278.0}}
+            return {"rate": {"bid": 4361.8, "ask": 4362.2}}
+        return _get
+
+    def _run(self, cfg):
+        import providers
+        from unittest import mock
+        calls = []
+        with mock.patch.dict("os.environ", {"METALS_API_KEY": "secret"}), \
+             mock.patch.object(providers, "_get_json", self._fake(calls)):
+            out = providers.metals_dev(cfg)
+        return out, calls
+
+    def test_two_requests_per_build(self):
+        out, calls = self._run(dict(self.CFG))
+        self.assertEqual(len(calls), 2, f"expected latest + gold spot, got {calls}")
+        self.assertEqual(sum("/v1/metal/spot" in c for c in calls), 1)
+        self.assertNotIn("metal=silver", " ".join(calls))  # was fetched and never displayed
+        self.assertAlmostEqual(out["gold_bid_usd_oz"], 4361.8)
+        self.assertIsNone(out["silver_bid_usd_oz"])
+        self.assertAlmostEqual(out["fx_per_usd"]["SAR"], 3.75)
+
+    def test_bid_ask_can_be_switched_off(self):
+        out, calls = self._run(dict(self.CFG, bid_ask_metals=[]))
+        self.assertEqual(len(calls), 1)
+        self.assertIsNone(out["gold_bid_usd_oz"])
+
+    def test_config_asks_for_gold_only(self):
+        cfg = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
+        self.assertEqual(cfg.get("bid_ask_metals"), ["gold"])
+
+
+class ErrorMessages(unittest.TestCase):
+    """A bare 'HTTP Error 400' cost us a stale site for seven hours. Errors must say why."""
+
+    def test_http_error_explains_and_redacts_the_key(self):
+        import io, urllib.error, providers
+        from unittest import mock
+        err = urllib.error.HTTPError(
+            "https://api.metals.dev/v1/latest?api_key=SECRETKEY&currency=USD", 400, "Bad Request",
+            {}, io.BytesIO(b'{"status":"failure","error_message":"Monthly quota exceeded"}'))
+        with mock.patch("urllib.request.urlopen", side_effect=err):
+            with self.assertRaises(RuntimeError) as cm:
+                providers._get_json("https://api.metals.dev/v1/latest?api_key=SECRETKEY&currency=USD")
+        msg = str(cm.exception)
+        self.assertIn("Monthly quota exceeded", msg)   # the real reason, from the response body
+        self.assertIn("quota", msg)                     # our hint for 400/402/429
+        self.assertNotIn("SECRETKEY", msg)              # public repo: never log the key
