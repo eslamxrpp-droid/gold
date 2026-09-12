@@ -1,6 +1,8 @@
 """Run: python -m unittest discover tests   (from the site folder)"""
 import json
+import shutil
 import subprocess
+import tempfile
 import sys
 import unittest
 from pathlib import Path
@@ -149,9 +151,23 @@ class FrontPage(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        subprocess.check_output([sys.executable, str(ROOT / "build.py")], text=True)
-        cls.html = (ROOT / "dist" / "index.html").read_text(encoding="utf-8")
-        cls.sitemap = (ROOT / "dist" / "sitemap.xml").read_text(encoding="utf-8")
+        # Build into a throwaway folder: never touch dist/, which the scheduled job
+        # has just built with REAL prices and is about to upload.
+        cls.tmp = Path(tempfile.mkdtemp())
+        cfg = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
+        cfg["provider"] = "sample"
+        real_dist = build.DIST
+        build.DIST = cls.tmp
+        try:
+            build.build(cfg)
+        finally:
+            build.DIST = real_dist
+        cls.html = (cls.tmp / "index.html").read_text(encoding="utf-8")
+        cls.sitemap = (cls.tmp / "sitemap.xml").read_text(encoding="utf-8")
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.tmp, ignore_errors=True)
 
     def test_is_a_real_page(self):
         self.assertIn("<h1>", self.html)
