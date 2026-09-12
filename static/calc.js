@@ -20,6 +20,43 @@
     zakatSilver: function (weight, purity, nisab, pure, rate) {
       var g = weight * purity / 1000, value = g * pure, reached = g >= nisab;
       return { pure_grams: g, reached: reached, value: value, zakat: reached ? value * rate : 0 };
+    },
+
+    // --- staleness ------------------------------------------------------
+    // The build refuses to publish a bad price, so when the feed breaks the pages
+    // simply stop changing: correct, but they still say "last updated" as if it were
+    // now. This runs in the visitor's browser, so it keeps working while the build is
+    // broken - which is exactly when it is needed.
+    ageMinutes: function (updatedUtc, nowMs) {
+      var t = Date.parse(updatedUtc);
+      if (!isFinite(t)) return null;              // unparseable: say nothing rather than cry wolf
+      return Math.floor((nowMs - t) / 60000);
+    },
+    isStale: function (updatedUtc, nowMs, staleAfterMinutes) {
+      var m = M.ageMinutes(updatedUtc, nowMs);
+      return m === null ? false : m >= staleAfterMinutes;
+    },
+    // Arabic counted nouns are not "n + singular": 2 is dual, 3-10 takes the plural,
+    // 11+ goes back to the singular. Getting this wrong looks careless to a reader.
+    humanAge: function (minutes, lang) {
+      var ar = lang !== "en";
+      var n, unit;
+      if (minutes < 1440) { n = Math.max(1, Math.floor(minutes / 60)); unit = "hour"; }
+      else { n = Math.floor(minutes / 1440); unit = "day"; }
+      if (!ar) return n + " " + unit + (n === 1 ? "" : "s");
+      var forms = unit === "hour"
+        ? { one: "ساعة", two: "ساعتين", few: "ساعات", many: "ساعة" }
+        : { one: "يوم", two: "يومين", few: "أيام", many: "يومًا" };
+      if (n === 1) return forms.one;
+      if (n === 2) return forms.two;
+      if (n <= 10) return n + " " + forms.few;
+      return n + " " + forms.many;
+    },
+    staleMessage: function (minutes, lang) {
+      var age = M.humanAge(minutes, lang);
+      return lang === "en"
+        ? "This price has not updated for " + age + ". It may no longer match the market."
+        : "لم يتم تحديث هذا السعر منذ " + age + "، وقد لا يطابق السوق الآن.";
     }
   };
   if (typeof module !== "undefined") { module.exports = M; return; }
@@ -103,5 +140,19 @@
       $("zakat-calc").addEventListener("input", updZakat);
       $("zakat-calc").addEventListener("change", updZakat);
     }
+  });
+
+  // Show the stale banner if the last successful build is old.
+  document.addEventListener("DOMContentLoaded", function () {
+    var box = $("stale-notice"), data = $("prices");
+    if (!box || !data) return;
+    var P;
+    try { P = JSON.parse(data.textContent); } catch (e) { return; }
+    if (!P.updated_utc || !P.stale_after_minutes) return;
+    var mins = M.ageMinutes(P.updated_utc, Date.now());
+    if (mins === null || mins < P.stale_after_minutes) return;
+    var lang = (document.documentElement.getAttribute("lang") || "ar").slice(0, 2);
+    box.textContent = M.staleMessage(mins, lang);
+    box.hidden = false;
   });
 })(this);
