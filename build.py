@@ -8,6 +8,7 @@ If a safety check fails, the build stops and the old pages stay online (never pu
 Standard library only: no installs needed.
 """
 import argparse
+import hashlib
 import html
 import os
 import json
@@ -28,6 +29,15 @@ TEMPLATES = HERE / "templates"
 
 def fmt(x, digits=2):
     return f"{x:,.{digits}f}"
+
+
+def static_url(name):
+    """Cache-bust /static/*. Cloudflare and browsers cache those URLs hard, so without a
+    version a returning visitor keeps running the PREVIOUS deploy's CSS and JS. Found on
+    2026-09-12: the live pages were still executing the old calc.js after a deploy, which
+    silently disabled the stale-price notice — a safety feature must never be cached away."""
+    digest = hashlib.md5((HERE / "static" / name).read_bytes()).hexdigest()[:8]
+    return f"/static/{name}?v={digest}"
 
 
 def render(template_name, ctx):
@@ -307,6 +317,7 @@ def page(config, c, path, lang, title, description, body_template, ctx, alternat
         "site_name": config["site_name_ar"] if lang == "ar" else config["site_name_en"],
         "home": "/" if lang == "ar" else "/sa/en/",
         "nav": nav(NAV_AR if lang == "ar" else NAV_EN, path), "sample_banner": sample_banner, "content": body,
+        "css_url": static_url("style.css"), "js_url": static_url("calc.js"),
         "footer": render("footer_ar.html" if lang == "ar" else "footer_en.html",
                          {"updated": c["updated"], "source": html.escape(c["source"])}),
         "year": c["updated"][:4],
