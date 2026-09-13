@@ -79,6 +79,102 @@
     },
     toGrams: function (value, unit) { return unit === "kg" ? value * 1000 : value; },
 
+    // --- gold bullion (bars) ---------------------------------------------
+    // A bar is sold by FINENESS in parts per thousand, not by karat. 999.9 means 99.99%
+    // gold; "24K" is the rounded jeweller's word for roughly the same idea and is NOT an
+    // exact synonym, so it is never used here as one. A bar's fineness is applied ONCE,
+    // to the pure-gold reference the page already carries - never on top of a karat
+    // conversion, which would shrink the metal twice.
+    BULLION_FINENESS: [999, 999.9],
+
+    // Display policy, in one place because two figures have to agree with one word.
+    // Every SAR and percent figure the reader sees is rounded to 2 dp HERE, and the
+    // above/below/equal word is then decided from that SAME rounded number. Deciding the
+    // word from the full-precision value instead is how a page ends up printing "-0.00"
+    // or saying "below the metal value" next to "0.00 SAR".
+    // Rounding is half-away-from-zero applied to the binary double, so a value stored as
+    // 504.49499999999995 (typed as 504.495) displays as 504.49, and the formatter is
+    // always handed the already-rounded number so the two can never disagree.
+    round2: function (x) {
+      if (!isFinite(x)) return x;
+      var s = x < 0 ? -1 : 1;
+      return s * Math.round(Math.abs(x) * 100) / 100;
+    },
+    signState: function (rounded) { return rounded > 0 ? "above" : rounded < 0 ? "below" : "equal"; },
+
+    // An offer is a TOTAL the reader was quoted. Blank is "no offer", which is not the
+    // same thing as zero: zero is a number nobody was ever quoted, so it is an error to
+    // say out loud rather than a premium of minus the whole bar.
+    checkOffer: function (raw) {
+      if (raw === null || raw === undefined || !String(raw).trim()) return { state: "absent" };
+      var v = M.parseNum(raw);
+      if (v === null) return { state: "invalid", reason: "unreadable" };
+      if (v < 0) return { state: "invalid", reason: "negative" };
+      if (v === 0) return { state: "invalid", reason: "zero" };
+      return { state: "ok", value: v };
+    },
+
+    // The whole bullion calculation as data, so the tests can walk every case without a
+    // browser. Nothing here reaches the network or the DOM.
+    bullion: function (input) {
+      input = input || {};
+      var unit = input.unit === "kg" ? "kg" : "g";
+      // Same bounds the silver tool uses: 10,000 kg and 10,000,000 g are the same ceiling
+      // in grams, so a kg entry cannot slip past a limit a gram entry would hit.
+      var w = M.checkWeight(input.weight, unit === "kg" ? 10000 : 1e7);
+      if (!w.ok) return { ok: false, unit: unit, weight: w };
+
+      var grams = M.toGrams(w.value, unit);
+      var fineness = M.parseNum(input.fineness);
+      if (fineness === null || !(fineness > 0) || fineness > 1000) fineness = 999.9;
+
+      var pure = input.goldSarG;
+      // A snapshot that is missing, NaN, Infinity or non-positive must not become a
+      // reference value, a per-gram price or a premium. It produces no figure at all.
+      var snapshotOk = typeof pure === "number" && isFinite(pure) && pure > 0;
+      var fineGrams = grams * fineness / 1000;
+      var perGramFine = snapshotOk ? M.purityPrice(pure, fineness) : null;
+      var reference = snapshotOk ? fineGrams * pure : null;
+
+      var offers = {};
+      ["a", "b"].forEach(function (key) {
+        var o = M.checkOffer(input[key === "a" ? "offerA" : "offerB"]);
+        if (o.state === "ok") {
+          o.perGram = o.value / grams;              // GROSS bar grams, labelled as such
+          o.perGramShown = M.round2(o.perGram);
+          o.totalShown = M.round2(o.value);
+          if (reference !== null) {
+            o.premiumSar = o.value - reference;
+            o.premiumPct = o.premiumSar / reference * 100;
+            o.premiumSarShown = M.round2(o.premiumSar);
+            o.direction = M.signState(o.premiumSarShown);
+            // When the SAR difference rounds to nothing, the percent says nothing either,
+            // so the reader never sees "equal" beside "+0.04%".
+            o.premiumPctShown = o.direction === "equal" ? 0 : M.round2(o.premiumPct);
+          }
+        }
+        offers[key] = o;
+      });
+
+      // Which total is lower is decided on the FULL-PRECISION numbers; only the gap the
+      // reader is shown is rounded. If that gap rounds to zero the two totals are
+      // presented as equal at the precision shown, rather than "A is lower by 0.00".
+      var compare = null;
+      if (offers.a.state === "ok" && offers.b.state === "ok") {
+        var rawDiff = offers.a.value - offers.b.value;
+        var shown = M.round2(Math.abs(rawDiff));
+        compare = shown === 0
+          ? { lower: "equal", diffSar: 0 }
+          : { lower: rawDiff < 0 ? "a" : "b", diffSar: shown };
+      }
+
+      return {
+        ok: true, unit: unit, weight: w.value, grams: grams, fineness: fineness,
+        finenessPercent: fineness / 10, fineGrams: fineGrams, perGramFine: perGramFine,
+        reference: reference, snapshotOk: snapshotOk, offers: offers, compare: compare
+      };
+    },
+
     // --- market session, computed from the READER'S clock -----------------
     // The build's "market closed" flag is true when the page was made and at no other
     // moment. A page built on Saturday and still open on Monday would keep announcing a
@@ -213,26 +309,51 @@
   // Inputs survive a price refresh, a reload and the back button. Per page, per tab only -
   // nothing here is sent anywhere, and sessionStorage dies with the tab.
   var STORE_KEY = "mithqal:" + PAGE;
+
+  // One page can carry more than one tool. The stored shape is unchanged - a flat
+  // {inputId: value} object per page, so values saved by an earlier build still restore -
+  // but a save now MERGES its own scope's ids into that object instead of replacing it.
+  // It used to replace it: the moment the gold calculator page grew a second tool, typing
+  // in either one silently erased the other's saved values, and a refresh brought back
+  // half a form. A save still writes every one of its own inputs every time, including
+  // the empty ones, so clearing a field really clears it and a reload cannot resurrect it.
+  function readStore() {
+    try {
+      var data = JSON.parse(sessionStorage.getItem(STORE_KEY) || "{}");
+      return (data && typeof data === "object" && !Array.isArray(data)) ? data : {};
+    } catch (e) { return {}; }
+  }
   function saveInputs(scope) {
     try {
-      var data = {};
+      var data = readStore();
       scope.querySelectorAll("input,select").forEach(function (el) {
         if (el.id && el.type !== "radio") data[el.id] = el.value;
       });
       sessionStorage.setItem(STORE_KEY, JSON.stringify(data));
     } catch (e) { /* private mode, blocked storage: the calculator still works */ }
   }
+  // Reports whether THIS scope got anything back. Counting the whole object instead made
+  // an empty tool render a result the moment a different tool on the page had saved
+  // something - an answer to a question the reader never asked.
   function restoreInputs(scope) {
     try {
-      var data = JSON.parse(sessionStorage.getItem(STORE_KEY) || "{}");
+      var data = readStore(), restored = 0;
       Object.keys(data).forEach(function (id) {
         var el = scope.querySelector("#" + CSS.escape(id));
-        if (el) el.value = data[id];
+        if (el) { el.value = data[id]; restored++; }
       });
-      return Object.keys(data).length > 0;
+      return restored > 0;
     } catch (e) { return false; }
   }
 
+  // Two different kinds of fact live in these notes, and only one of them is fixed.
+  // The QUOTE TIME is a property of the snapshot: it is decided when the page is built and
+  // must never move afterwards. "The market is closed at this time" is a statement about the
+  // READER'S present, computed from their clock - so it goes stale exactly the way the old
+  // once-at-load banner did. A page left open across the Sunday reopening sat there saying
+  // the market was closed while the banner above it had already stopped saying so. These
+  // notes are therefore re-rendered on the same timer and tab-return that drive the banner.
+  // Re-rendering never re-reads a price and never advances the quote time.
   function snapshotNote(P) {
     if (!P.quote_time_known) {
       return t("المصدر لم يعطِ وقتًا للتسعيرة، فلا يمكن التأكد من حداثة هذا الحساب.",
@@ -245,20 +366,48 @@
     return base;
   }
 
+  // The bullion note names the provider as well, because that tool's whole claim is "this is
+  // what the metal in the bar is worth, according to someone, at a stated moment".
+  function bullionSnapshotNote(P, source) {
+    if (!P.quote_time_known) {
+      return t("المرجع: سعر الذهب الخالص من " + source + "؛ المصدر لم يعطِ وقتًا للتسعيرة، فلا يمكن تأكيد حداثة هذا الحساب.",
+               "Reference: pure gold from " + source + "; the source gave no quote time, so this calculation's freshness cannot be confirmed.");
+    }
+    var note = t("المرجع: سعر الذهب الخالص من " + source + "، تسعيرة " + P.updated + " بتوقيت الرياض.",
+                 "Reference: pure gold from " + source + ", quoted " + P.updated + " Riyadh time.");
+    if (M.marketClosedAt(Date.now(), P.market_session)) {
+      note += t(" السوق مغلقة في هذا الوقت.", " The market is closed at this time.");
+    }
+    return note;
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     var pEl = $("prices");
     if (!pEl) return;
     var P;
     try { P = JSON.parse(pEl.textContent); } catch (e) { return; }
 
-    ["calc-snapshot", "sell-snapshot", "sv-snapshot"].forEach(function (id) {
-      if ($(id)) $(id).textContent = snapshotNote(P);
-    });
+    function renderSnapshotNotes() {
+      ["calc-snapshot", "sell-snapshot", "sv-snapshot"].forEach(function (id) {
+        if ($(id)) $(id).textContent = snapshotNote(P);
+      });
+      var bl = $("bl-snapshot"), section = $("bullion-calc");
+      if (bl && section) {
+        bl.textContent = bullionSnapshotNote(P, section.getAttribute("data-source") || "");
+      }
+    }
+    renderSnapshotNotes();
 
     // ---- gold value calculator
     if ($("value-calc")) {
       var vc = $("value-calc");
       var upd = function () {
+        // Persist FIRST, before any validation can return. Every early return below is a
+        // state the reader can walk away from - an emptied field most of all - and a return
+        // that skipped the save left the PREVIOUS value in storage, so a reload brought back
+        // a number the reader had deliberately deleted. Saving first also means the stored
+        // object always matches the boxes on screen, whatever path the handler takes.
+        saveInputs(vc);
         var w = M.checkWeight($("calc-weight").value);
         var out = $("calc-result");
         if (!w.ok) { out.textContent = weightMessage(w.reason); return; }
@@ -269,7 +418,6 @@
         var total = M.itemValue(w.value, k, P.gold_sar_g, mk);
         out.innerHTML = t("قيمة الذهب: <strong>", "Gold value: <strong>") + fmt(raw) + t(" ريال</strong>", " SAR</strong>") +
           (mk ? t("<br>مع المصنعية: <strong>", "<br>With making charge: <strong>") + fmt(total) + t(" ريال</strong>", " SAR</strong>") : "");
-        saveInputs(vc);
       };
       vc.addEventListener("input", upd);
       vc.addEventListener("change", function (e) {
@@ -280,10 +428,193 @@
       $("calc-weight").addEventListener("change", function () { track("calculator_used", { page: PAGE, locale: LOCALE, metal: "gold", tool: "value" }); });
     }
 
+    // ---- gold bullion offer comparison (Arabic and English share this code)
+    // What this tool is: the reader's own quoted TOTAL, set beside the value of the metal
+    // in the bar. What it is not: a verdict on a dealer. The gap between a bar's price and
+    // its metal content pays for refining, minting, the dealer's margin and whatever else
+    // the dealer puts in the number - we cannot see the split, so we do not narrate it,
+    // score it, colour it, or call the cheaper total the better buy.
+    if ($("bullion-calc")) {
+      var blc = $("bullion-calc");
+      var blSummary = $("bl-summary"), blDetail = $("bl-detail");
+      var lastSummary = null;
+
+      // <bdi> on every figure: an Arabic line that ends in "-1.25%" otherwise reorders into
+      // "%1.25-" and changes what the number says.
+      function sar(x) { return "<bdi>" + fmt(x) + t(" ريال", " SAR") + "</bdi>"; }
+      function signed(x, suffix) {
+        var sign = x < 0 ? "−" : x > 0 ? "+" : "";
+        return "<bdi>" + sign + fmt(Math.abs(x)) + suffix + "</bdi>";
+      }
+      function gramsText(g) { return "<bdi>" + fmt(g, g === Math.round(g) ? 0 : 2) + t(" جرام", " g") + "</bdi>"; }
+      function offerLabel(k) { return k === "a" ? t("أ", "A") : t("ب", "B"); }
+      function directionWord(d) {
+        if (d === "above") return t("أعلى من قيمة الذهب المرجعية", "above the reference metal value");
+        if (d === "below") return t("أقل من قيمة الذهب المرجعية", "below the reference metal value");
+        return t("مطابق لقيمة الذهب المرجعية", "equal to the reference metal value");
+      }
+      function offerProblem(k, reason) {
+        var L = offerLabel(k);
+        if (reason === "negative") return t("مبلغ العرض " + L + " لا يكون بالسالب.", "Offer " + L + " cannot be negative.");
+        if (reason === "zero") return t("أدخل للعرض " + L + " مبلغًا أكبر من صفر، أو اترك الخانة فارغة.",
+                                        "Enter an amount greater than zero for offer " + L + ", or leave it blank.");
+        return t("لم نفهم مبلغ العرض " + L + ". اكتبه بالأرقام، مثل 20000",
+                 "Offer " + L + " could not be read. Enter digits, for example 20000");
+      }
+
+      // An error has to be attached to the field it is about, not just floated near the
+      // result. Each input owns a stable, always-present slot that its aria-describedby
+      // already points at, so turning an error on and off is a text change plus an
+      // aria-invalid flag - no attribute wiring at runtime, nothing to leave dangling, and
+      // no focus moved out from under whoever is typing. Clearing it is as important as
+      // setting it: a fixed field that still reads "invalid" is its own bug.
+      function setFieldError(id, message) {
+        var input = $(id), slot = $(id + "-error");
+        if (!input || !slot) return;
+        if (message) {
+          if (slot.textContent !== message) slot.textContent = message;
+          input.setAttribute("aria-invalid", "true");
+        } else {
+          if (slot.textContent) slot.textContent = "";
+          input.removeAttribute("aria-invalid");
+        }
+      }
+      function markOfferFields() {
+        ["a", "b"].forEach(function (k) {
+          var o = M.checkOffer($("bl-offer-" + k).value);
+          setFieldError("bl-offer-" + k, o.state === "invalid" ? offerProblem(k, o.reason) : "");
+        });
+      }
+
+      // The one live region on this tool: a single short sentence, rewritten only when its
+      // text really changes, so a screen reader is not made to re-read the whole breakdown
+      // on every keystroke. It is visually hidden because every fact in it is also in the
+      // breakdown below, which is NOT a live region - showing both would print the same
+      // conclusion twice on screen.
+      // With no breakdown to show, the results box would otherwise sit there as an empty
+      // bordered panel. It is stripped of its chrome rather than hidden: the announcement
+      // line lives inside it and must stay reachable.
+      function setDetail(html) {
+        blDetail.innerHTML = html;
+        $("bl-result").classList.toggle("is-empty", !html);
+      }
+      function announce(text) {
+        if (text === lastSummary) return;
+        lastSummary = text;
+        blSummary.textContent = text;
+      }
+
+      var updBullion = function () {
+        saveInputs(blc);                     // before validation: see the gold calculator above
+        var r = M.bullion({
+          weight: $("bl-weight").value,
+          unit: $("bl-unit").value,
+          fineness: $("bl-fineness").value,
+          offerA: $("bl-offer-a").value,
+          offerB: $("bl-offer-b").value,
+          goldSarG: P.gold_sar_g
+        });
+
+        if (!r.ok) {
+          // Said out loud AND shown on the field itself: the live region is invisible, so an
+          // error that only went there would be an error nobody sighted could see.
+          var problem = weightMessage(r.weight.reason, "bullion");
+          setFieldError("bl-weight", problem);
+          // The offers are still judged while the weight is being fixed, so a bad B stays
+          // flagged on its own field and a corrected one stops being flagged.
+          markOfferFields();
+          setDetail("");
+          announce(problem);
+          return;
+        }
+        setFieldError("bl-weight", "");
+
+        var fineLabel = "<bdi>" + r.fineness + " (" + r.finenessPercent + "%)</bdi>";
+        var rows = [
+          [t("الوزن", "Weight"), gramsText(r.grams) + (r.unit === "kg" ? t(" (1 كيلو = 1000 جرام)", " (1 kg = 1000 g)") : "")],
+          [t("نقاء السبيكة", "Fineness"), fineLabel],
+          [t("الذهب الخالص في السبيكة", "Pure gold in the bar"), gramsText(r.fineGrams)]
+        ];
+
+        var summary;
+        if (!r.snapshotOk) {
+          rows.push([t("قيمة الذهب المرجعية", "Reference metal value"),
+                     t("غير متاحة", "not available")]);
+          summary = t("سعر الذهب المرجعي غير متاح الآن، فلا يمكن حساب قيمة السبيكة ولا أي فرق عنها.",
+                      "The reference gold price is not available right now, so neither the bar's metal value nor any difference from it can be calculated.");
+        } else {
+          rows.push([t("سعر الجرام عند هذا النقاء", "Per gram at this fineness"), sar(M.round2(r.perGramFine))]);
+          rows.push([t("قيمة الذهب المرجعية", "Reference metal value"), "<strong>" + sar(M.round2(r.reference)) + "</strong>"]);
+          summary = t("قيمة الذهب المرجعية لسبيكة ", "Reference metal value for a ") +
+            fmt(r.grams, r.grams === Math.round(r.grams) ? 0 : 2) + t(" جرام نقاء ", " g bar at ") + r.fineness +
+            t(": ", " fineness: ") + fmt(M.round2(r.reference)) + t(" ريال.", " SAR.");
+        }
+
+        var html = "<table class='bl-table'><tbody>" + rows.map(function (row) {
+          return "<tr><th scope='row'>" + row[0] + "</th><td>" + row[1] + "</td></tr>";
+        }).join("") + "</tbody></table>";
+
+        // Each offer stands on its own. A B that cannot be read never suppresses a valid A
+        // and never becomes a winner.
+        ["a", "b"].forEach(function (k) {
+          var o = r.offers[k];
+          setFieldError("bl-offer-" + k,
+                        o.state === "invalid" ? offerProblem(k, o.reason) : "");
+          if (o.state === "absent") return;
+          if (o.state === "invalid") {
+            summary += " " + offerProblem(k, o.reason);
+            return;
+          }
+          var line = "<p class='bl-offer'><strong>" + t("العرض ", "Offer ") + offerLabel(k) + "</strong>: " +
+            t("الإجمالي ", "total ") + sar(o.totalShown) + t(" · للجرام ", " · per gram ") + sar(o.perGramShown) +
+            t(" (على وزن السبيكة كاملًا)", " (on the full bar weight)");
+          if (o.direction) {
+            line += "<br><span class='bl-diff'>" + signed(o.premiumSarShown, t(" ريال", " SAR")) +
+              " " + directionWord(o.direction) + " (" + signed(o.premiumPctShown, "%") + ")</span>";
+            summary += t(" العرض ", " Offer ") + offerLabel(k) + " " + directionWord(o.direction) +
+              t(" بـ ", " by ") + fmt(Math.abs(o.premiumSarShown)) + t(" ريال.", " SAR.");
+          }
+          html += line + "</p>";
+        });
+
+        if (r.compare) {
+          var cmp;
+          if (r.compare.lower === "equal") {
+            cmp = t("العرضان متساويان في الإجمالي عند الدقة المعروضة.",
+                    "The two totals are equal at the precision shown.");
+          } else {
+            cmp = t("العرض ", "Offer ") + offerLabel(r.compare.lower) +
+              t(" أقل إجمالًا بـ ", " is the lower total, by ") + fmt(r.compare.diffSar) + t(" ريال.", " SAR.");
+          }
+          html += "<p class='bl-compare'>" + cmp + t(" هذه مقارنة بين مبلغين أدخلتهما أنت، لا أكثر.",
+                                                     " That is a comparison of two amounts you entered, nothing more.") + "</p>";
+          summary += " " + cmp;
+        }
+
+        setDetail(html);
+        announce(summary);
+      };
+
+      blc.addEventListener("input", updBullion);
+      blc.addEventListener("change", updBullion);
+      blc.querySelectorAll(".presets button").forEach(function (b) {
+        b.addEventListener("click", function () {
+          $("bl-weight").value = b.getAttribute("data-weight");
+          $("bl-unit").value = b.getAttribute("data-unit");
+          updBullion();
+        });
+      });
+      // bl-snapshot itself is written by renderSnapshotNotes(), which re-runs on the
+      // freshness timer - see the note above snapshotNote().
+      restoreInputs(blc);          // saved values win over the markup defaults
+      updBullion();                // and a first visit still sees the 10 g reference value
+    }
+
     // ---- used-gold sell calculator
     if ($("sell-calc")) {
       var sc = $("sell-calc");
       var updSell = function () {
+        saveInputs(sc);                      // before validation: see the gold calculator above
         var w = M.checkWeight($("sell-weight").value);
         var out = $("sell-result");
         if (!w.ok) { out.textContent = weightMessage(w.reason); return; }
@@ -296,7 +627,6 @@
           t(" ريال</strong>", " SAR</strong>") +
           (d ? t("<br>بعد خصم المحل ", "<br>After a " ) + d + t("%: <strong>", "% shop deduction: <strong>") + fmt(net) +
                t(" ريال</strong>", " SAR</strong>") : "");
-        saveInputs(sc);
       };
       sc.addEventListener("input", updSell);
       sc.addEventListener("change", updSell);
@@ -308,6 +638,7 @@
     if ($("silver-calc")) {
       var sv = $("silver-calc");
       var updSilver = function () {
+        saveInputs(sv);                      // before validation: see the gold calculator above
         var out = $("sv-result");
         var unit = $("sv-unit").value;
         var w = M.checkWeight($("sv-weight").value, unit === "kg" ? 10000 : 1e7);
@@ -346,7 +677,6 @@
           track("quote_compared", { page: PAGE, locale: LOCALE, metal: "silver", basis: basis });
         }
         out.innerHTML = html;
-        saveInputs(sv);
       };
       sv.addEventListener("input", updSilver);
       sv.addEventListener("change", function (e) {
@@ -367,7 +697,9 @@
     }
 
     function weightMessage(reason, metal) {
-      var what = metal === "silver" ? t("قيمة الفضة", "the metal value") : t("القيمة", "the value");
+      var what = metal === "silver" ? t("قيمة الفضة", "the metal value")
+               : metal === "bullion" ? t("قيمة الذهب المرجعية", "the reference metal value")
+               : t("القيمة", "the value");
       if (reason === "empty") return t("أدخل الوزن لعرض ", "Enter a weight to see ") + what;
       if (reason === "negative") return t("الوزن لا يكون بالسالب.", "A weight cannot be negative.");
       if (reason === "zero") return t("أدخل وزنًا أكبر من صفر.", "Enter a weight greater than zero.");
@@ -385,6 +717,7 @@
         rows.appendChild(r);
       });
       var updZakat = function () {
+        saveInputs(zc);                      // before validation: see the gold calculator above
         var items = [];
         rows.querySelectorAll(".row").forEach(function (r) {
           var w = M.parseNum(r.querySelector(".zg-weight").value);
@@ -419,7 +752,6 @@
         }
         html += "<p class='note'>تجب الزكاة إذا حال على المال حول هجري كامل. هذه النتيجة تقديرية وليست فتوى.</p>";
         $("zakat-result").innerHTML = html;
-        saveInputs(zc);
       };
       zc.addEventListener("input", updZakat);
       zc.addEventListener("change", updZakat);
@@ -470,9 +802,9 @@
     }
 
     renderStale();
-    setInterval(function () { renderStale(); checkForNewer(); }, CHECK_MS);
+    setInterval(function () { renderStale(); renderSnapshotNotes(); checkForNewer(); }, CHECK_MS);
     document.addEventListener("visibilitychange", function () {
-      if (!document.hidden) { renderStale(); checkForNewer(); }
+      if (!document.hidden) { renderStale(); renderSnapshotNotes(); checkForNewer(); }
     });
   });
 })(this);
