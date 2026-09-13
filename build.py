@@ -653,6 +653,31 @@ def methodology_table(config, lang):
 
 
 def write_assets(config, c, snap, built):
+    # A root 404 disables Cloudflare Pages' implicit SPA fallback. Error documents
+    # have no canonical: an unknown URL must not claim to be our homepage.
+    (DIST / "404.html").write_text(f'''<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, follow">
+<title>الصفحة غير موجودة | مثقال — Page not found</title>
+<link rel="stylesheet" href="{static_url('style.css')}">
+</head>
+<body><main id="main">
+<h1>404 — الصفحة غير موجودة</h1>
+<p>لم نعثر على الصفحة المطلوبة. يمكنك متابعة أسعار المعادن من الروابط التالية.</p>
+<nav aria-label="العودة إلى أسعار المعادن">
+<a href="/sa/">أسعار الذهب</a> · <a href="/sa/silver/">أسعار الفضة</a>
+</nav>
+<section lang="en" dir="ltr">
+<h2>Page not found</h2>
+<p>We could not find the requested page.</p>
+<nav aria-label="Metal prices">
+<a href="/sa/en/">Gold prices</a> · <a href="/sa/en/silver/">Silver prices</a>
+</nav></section>
+</main></body></html>
+''', encoding="utf-8")
     (DIST / "static").mkdir(parents=True, exist_ok=True)
     for f in (HERE / "static").iterdir():
         (DIST / "static" / f.name).write_bytes(f.read_bytes())
