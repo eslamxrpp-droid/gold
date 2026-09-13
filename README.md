@@ -1,42 +1,64 @@
-# Prototype site (gold + silver prices, Saudi Arabia)
+# Mithqal — gold and silver prices, Saudi Arabia
 
-Status: **prototype, sample data, not published** (built session 04, 2026-09-11).
-Pages carry `noindex` and a yellow "sample data" banner until a real price feed and domain exist.
+Live at **https://mithqalprice.com**. Static site, built by a Python script, rebuilt every
+15 minutes by a GitHub Action and uploaded to Cloudflare Pages.
 
-## What it builds
+**Founding principle: clarity & integrity > revenue.** Every number shows its source, quote
+time, unit and purity basis; spot metal value is never presented as a shop price; the stale,
+market-closed and time-unavailable states are designed, not hidden; and nothing is invented —
+no dealer prices, no forecasts, no ratings, no explanations of why the market moved.
 
-| URL | Language | Page |
-|---|---|---|
-| `/sa/` | Arabic | Gold price today by karat (24/22/21/18), 7-day history, silver box |
-| `/sa/up-or-down/` | Arabic | Up or down vs yesterday and last week, per karat |
-| `/sa/sell-price/` | Arabic | Market sell/buy (bid/ask) by karat + used-gold sell calculator |
-| `/sa/calculator/` | Arabic | Gold value calculator (weight × karat, optional making charge) |
-| `/sa/zakat/` | Arabic | Gold + silver nisab today in SAR + zakat calculator, both scholarly views, cited sources |
-| `/sa/silver/` | Arabic | Silver price today by purity (999/925) per gram, ounce and kilo, 7-day history, nisab link |
-| `/sa/en/` | English | Gold rate per gram / 10 g / tola / ounce, INR and PKR, Riyadh/Jeddah, silver section, FAQ |
+## The files
 
-Not built yet: UAE pages, ads, structured data (FAQ markup skipped: since 2023 Google shows FAQ rich results
-only for government and health sites).
+| File | What it does |
+|---|---|
+| `pages.py` | **The page registry.** Nav, canonicals, hreflang, breadcrumbs and the sitemap all come from here |
+| `providers.py` | Talks to the price feed and normalises its shape |
+| `snapshot.py` | Builds the one versioned snapshot, and decides whether it may be published |
+| `history.py` | Finalised daily closes: gaps, bounded backfill, saving |
+| `prices.py` | Pure arithmetic and the market-session rules |
+| `build.py` | Renders the pages. Asks the four above; decides nothing about data itself |
+| `PAGE-MAP.md` | The 14 pages, what each is for, and the one deliberately not built |
+| `DATA-SCHEMA.md` | The snapshot, the four freshness states, what stops a build, how history works |
+| `MEASUREMENT.md` | Search Console status and the analytics event contract (switched off) |
+| `WIDGET-MVP.md` | Follow-on work, and the redistribution-rights question that gates it |
+| `DEPLOY.md` / `RELEASE.md` | Putting it online / shipping a change and rolling one back |
+
+## The pages
+
+14 pages: `/` plus seven Arabic pages under `/sa/` and six English pages under `/sa/en/`.
+The full table, with each page's job and its translation pair, is in `PAGE-MAP.md`.
+An English zakat page is deliberately **not** built — the reason is there too.
 
 ## How it works (plain English)
 
-1. `build.py` asks a **price provider** for today's gold and silver price (USD per ounce).
-2. **Safety checks** stop the build if the price looks wrong (out of range, jumped > 10% in a day,
-   older than 90 minutes, bad riyal rate). The old pages then stay online, so a wrong price is never published.
-3. It saves the day's price in `data/history.json` (for "up or down" and the 7-day table). Once a day it also
-   asks the feed for the real daily closes of the past days. On weekends the metals market is closed, so the
-   "price is too old" check is skipped from Friday 21:00 UTC to Sunday 22:00 UTC.
-4. It fills the HTML templates in `templates/` and writes the finished site into `dist/`.
-5. The calculators run in the visitor's browser (`static/calc.js`) using the prices embedded in each page.
+1. `build.py` asks a **price provider** for gold and silver in USD per ounce.
+2. `snapshot.py` turns that into **one versioned snapshot** where every number carries its
+   unit, purity basis, currency, quote side, quote time and status — and then **validates**
+   it. If anything fails (implausible price, no quote time, a jump over 10%, bid above ask,
+   a bad riyal rate, a quote older than the limit) the build stops and the pages already
+   online stay exactly as they are. `DATA-SCHEMA.md` lists every stopping condition.
+3. `history.py` keeps **finalised daily closes** in `data/history.json`. Today is never
+   written there: today's live price is shown flagged "so far today", and today's real close
+   arrives tomorrow. Missing dates are detected and re-requested a bounded number of times,
+   and never invented.
+4. `build.py` fills the templates for every page in the registry and writes `dist/`, plus
+   `sitemap.xml`, `robots.txt`, `_headers`, and `data/prices.json` (the same snapshot, for
+   the site's own JavaScript).
+5. The calculators run in the visitor's browser (`static/calc.js`) from the embedded
+   snapshot. The page re-checks its own freshness on a timer and offers a reload when a newer
+   build exists — it never calls the price provider, so traffic costs no API requests.
 
-Formulas: SAR per gram = USD/oz × 3.75 ÷ 31.1034768 · karat price = 24K × karat ÷ 24 · silver = pure × purity ÷ 1000.
+Formulas: SAR per gram = USD/oz × 3.75 ÷ 31.1034768 · karat price = 24K × karat ÷ 24 ·
+silver = pure × purity ÷ 1000. The same formulas exist in `static/calc.js`, and the tests run
+both on the same inputs and compare.
 
 ## Run it on your computer (Windows)
 
 1. Install Python 3 from python.org (tick "Add Python to PATH").
 2. Open a terminal in this `site` folder and run:
    ```
-   python build.py
+   python build.py --provider sample
    python -m http.server 8000 -d dist
    ```
 3. Open http://localhost:8000/sa/ in a browser.
@@ -68,16 +90,35 @@ Never write the API key into a file: set it as an environment variable where the
 
 | Path | What |
 |---|---|
-| `config.json` | Site name (placeholder), domain (placeholder), provider, karats, noindex switch |
-| `build.py` | Fetch → check → history → render |
-| `prices.py` | Price and zakat math (pure functions) |
+| `config.json` | Brand, domain, provider, karats, validation limits, analytics switch, noindex |
+| `pages.py` | The page registry (see `PAGE-MAP.md`) |
+| `build.py` | Rendering: templates in, `dist/` out |
+| `snapshot.py` | The versioned snapshot and every rule that can stop a build |
+| `history.py` | Finalised daily closes, gap detection, bounded backfill |
+| `prices.py` | Price and zakat math, market-session rules (pure functions) |
 | `providers.py` | Price feed adapters |
-| `data/zakat_rules.json` | Nisab, rate, jewelry opinions, each with its source |
-| `data/sample_prices.json` | Sample prices for development |
+| `data/zakat_rules.json` | Nisab, rate, jewellery opinions, each with its source |
+| `data/sample_prices.json` | Sample prices for local previews |
+| `data/history.json` | Finalised daily closes. Today is never in here |
+| `data/history_state.json` | Backfill attempt counters, so a permanent gap is not retried forever |
 | `templates/` | Page HTML (`{{name}}` placeholders) |
-| `static/` | CSS and calculator JS |
-| `tests/` | Unit tests |
+| `static/` | CSS, calculator JS, self-hosted Tajawal, icons, `og.png` |
+| `static/analytics.js` | Event adapter, **disabled** — see `MEASUREMENT.md` |
+| `tests/` | 96 tests. They build into a temp folder and never touch `dist/` |
 | `dist/` | Generated site (rebuild any time; don't edit by hand) |
-| `data/history.json` | Daily prices, created on the first live run |
 | `github-workflow-update-prices.yml` | The scheduled rebuild + upload job (goes to `.github/workflows/` in the repository) |
-| `DEPLOY.md` | How to put the site online |
+| `DEPLOY.md`, `RELEASE.md` | Putting the site online; shipping and rolling back a change |
+
+## Previewing the unhappy states
+
+A local preview shows the ordinary fresh state. To see the others:
+
+```
+python build.py --provider sample                      # normal
+MITHQAL_SAMPLE_AGE_MINUTES=420 python build.py --provider sample   # stale banner
+MITHQAL_SAMPLE_AGE_MINUTES= python build.py --provider sample      # no quote time
+```
+
+A sample build always writes `robots.txt` as `Disallow: /`, forces `noindex` on every page,
+shows the yellow banner and drops a `SAMPLE-BUILD-DO-NOT-PUBLISH.txt` marker in `dist/`, so a
+preview can never be mistaken for a release artifact.

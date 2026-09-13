@@ -1,15 +1,15 @@
 {
-  "_comment": "SAMPLE DATA for building and testing the prototype. NOT real prices. Moves are invented; end values are rounded approximate spot from 2026-09-11.",
+  "_comment": "SAMPLE DATA for building and previewing the prototype. NOT real prices. The quote time is generated `quote_age_minutes` before now so a local preview shows the normal, fresh state; set MITHQAL_SAMPLE_AGE_MINUTES to force a stale or market-closed preview.",
   "is_sample": true,
   "source_name": "Sample data (not real prices)",
   "timestamp_utc": "2026-09-11T12:00:00Z",
   "latest": {
-    "gold_usd_oz": 4362.0,
-    "silver_usd_oz": 64.4,
-    "gold_bid_usd_oz": 4359.82,
-    "gold_ask_usd_oz": 4364.18,
-    "silver_bid_usd_oz": 64.271,
-    "silver_ask_usd_oz": 64.529
+    "gold_usd_oz": 4383.5,
+    "silver_usd_oz": 64.92,
+    "gold_bid_usd_oz": 4381.3,
+    "gold_ask_usd_oz": 4385.7,
+    "silver_bid_usd_oz": 64.79,
+    "silver_ask_usd_oz": 65.05
   },
   "fx_per_usd": {
     "SAR": 3.75,
@@ -58,5 +58,6 @@
       "gold_usd_oz": 4362.0,
       "silver_usd_oz": 64.4
     }
-  ]
+  ],
+  "quote_age_minutes": 12
 }

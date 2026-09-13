@@ -1,0 +1,58 @@
+<h1>How Mithqal calculates gold and silver prices</h1>
+<p class="lead">The principle this site is built on: <strong>clarity and integrity before revenue</strong>. Every number here carries its source, its time and its unit, and anything we do not know is said plainly rather than filled in with a guess.</p>
+<p class="updated">{{fresh_en}}</p>
+
+<section>
+  <h2>In short</h2>
+  {{methodology_table}}
+</section>
+
+<section>
+  <h2>This is a metal price, not a shop price</h2>
+  <p>We publish the value of the metal on the global market, converted to Saudi riyals. A jeweller adds a making charge and a margin, and pays you less than the market price for used gold. Those differences vary by shop, we do not know them, and so we do not publish a "Riyadh price" or a "shop price" however well those phrases might search.</p>
+</section>
+
+<section>
+  <h2>Bid and ask</h2>
+  <p>When the source publishes two prices we show both as they are: <strong>bid</strong> is what the market pays you when you sell, <strong>ask</strong> is what you pay when you buy. When the source has only one price, the page says so and both columns show the same spot value.</p>
+</section>
+
+<section>
+  <h2>Quote time, and the unhappy states</h2>
+  <ul>
+    <li><strong>Quote time</strong> is when the source priced the metal, never when this page was built. We never substitute one for the other.</li>
+    <li><strong>Stale price:</strong> past two hours a notice appears at the top of the page, and the check keeps running while you read rather than only when the page opens.</li>
+    <li><strong>Market closed:</strong> the global market pauses over the weekend and the price freezes. We say the market is closed and show the quote time - and that state is recomputed in your browser rather than fixed when the page was built, so an old page cannot go on claiming a closed market after it reopens.</li>
+    <li><strong>Time unavailable:</strong> if the source gives us no timestamp we say "quote time not provided" rather than showing the build clock in its place.</li>
+    <li><strong>Source down:</strong> publishing stops and the previous page stays up. A page that admits it is old beats a number that is wrong.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Comparisons and dates</h2>
+  <p>"Versus yesterday" means yesterday. When yesterday is not in our records we name the date we actually compared against instead of calling it yesterday, and when the history does not reach back far enough for the weekly comparison we say it is unavailable.</p>
+  <p>Today's row in the daily tables is a live price ("so far today"). Today's recorded figure arrives tomorrow from the source's historical data; an intraday snapshot is never relabelled as a whole day.</p>
+  <p><strong>We do not call it a closing price.</strong> The source publishes one figure per date and its documentation does not say whether that is a close, a daily average or a snapshot, nor which timezone ends the day. So we call it the recorded price for that date, which is what we can stand behind.</p>
+</section>
+
+<section>
+  <h2>What we never publish</h2>
+  <ul>
+    <li>Shop, dealer or city-level retail prices, because we have no source for them.</li>
+    <li>Price forecasts, or explanations of why the market moved.</li>
+    <li>Testimonials, ratings, user counts or trust badges.</li>
+    <li>There is no advertising or sponsorship today. If that changes, it will be disclosed on the page itself.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Rupee conversions</h2>
+  <p>Where the gold page shows INR and PKR figures, those are the <strong>Saudi</strong> price converted at the same update's exchange rate. They are not the gold rate in India or Pakistan, which have their own duties, premiums and local rates.</p>
+</section>
+
+<section>
+  <h2>Corrections</h2>
+  <p>If we find an error in a number or in how it is calculated, we correct it and record the correction and its date on this page.</p>
+  <p class="note">No corrections have been published yet.</p>
+</section>
+<script type="application/json" id="prices">{{prices_json}}</script>

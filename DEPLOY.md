@@ -6,7 +6,11 @@ is fine for testing). Everything here uses Eslam's own accounts.
 **How it works:** GitHub keeps the code. A free GitHub robot ("Actions") runs `build.py` every 15 minutes,
 which fetches the price and rebuilds the pages, then uploads the finished `dist` folder to Cloudflare Pages,
 which serves it to visitors. If a price looks wrong the build fails, nothing is uploaded, and the pages
-already online stay unchanged.
+already online stay unchanged. The full list of conditions that stop a build is in `DATA-SCHEMA.md`.
+
+The job commits `data/history.json` only when it actually changed — roughly once a day, when a
+day finalises or a gap is filled — and rebases before pushing, so two runs cannot lose each
+other's rows.
 
 ## One-time setup
 
@@ -27,7 +31,9 @@ already online stay unchanged.
 6. **Domain:** buy it, add it to Cloudflare (free plan), then Pages project → Custom domains → add the domain.
 7. **Go live:** in `config.json` set `"noindex": false` and `"base_url"` to the real domain, and set
    `"provider": "metals_dev"`. Until then the site tells Google not to index it.
-8. **Search Console:** add the domain, submit `/sitemap.xml`.
+8. **Search Console:** add the domain (Domain property, DNS-verified), submit `/sitemap.xml`,
+   then request indexing for the 14 URLs in `PAGE-MAP.md`. **Not done as of 2026-09-12** —
+   see `MEASUREMENT.md`, which keeps this listed as planned until someone confirms it.
 
 ## After setup
 

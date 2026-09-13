@@ -1,16 +1,45 @@
 <h1>سعر الفضة اليوم في السعودية</h1>
 <p class="lead">سعر جرام الفضة عيار 999 اليوم <strong>{{s999}} ريال</strong> ·
-  <span class="{{s_direction_class}}">{{s_direction_arrow}} {{s_chg_day}} مقارنة بأمس</span></p>
-<p class="updated">آخر تحديث: <bdi dir="ltr">{{updated}}</bdi> بتوقيت الرياض</p>
+  <span class="{{s_direction_class}}">{{s_direction_arrow}} {{s_chg_day}}</span></p>
+<p class="updated">{{fresh_ar}} · <span class="cmp">{{cmp_label}}</span></p>
 
 <section>
-  <h2>كم سعر الفضة اليوم؟ الجرام والأونصة والكيلو</h2>
+  <h2>كم سعر الفضة اليوم؟ الجرام والأونصة والكيلو والسبيكة</h2>
   {{silver_table}}
-  <p>عيار 999 فضة خالصة تقريبًا (سبائك وعملات)، وعيار 925 (الفضة الإسترلينية) يحتوي 92.5% فضة ويُستخدم غالبًا في المجوهرات. سعر جرام الفضة عيار 925 اليوم {{s925}} ريال.</p>
+  <p>عيار 999 فضة خالصة تقريبًا (سبائك وعملات)، وعيار 925 (الفضة الإسترلينية) يحتوي 92.5% فضة ويُستخدم غالبًا في المجوهرات. سعر جرام الفضة عيار 925 اليوم {{s925}} ريال، وسعر الكيلو من عيار 999 نحو {{s999_kg}} ريال.</p>
+</section>
+
+<section class="calc" id="silver-calc" data-metal="silver">
+  <h2>حاسبة الفضة: كم تساوي فضتك؟</h2>
+  <p class="note">تحسب قيمة <strong>المعدن</strong> بسعر السوق. ليست سعرًا مضمونًا من محل: المحل يضيف المصنعية وهامش الربح عند البيع لك، ويخصم عند الشراء منك.</p>
+  <div class="presets" role="group" aria-label="أوزان جاهزة">
+    <button type="button" data-weight="1" data-unit="g">1 جرام</button>
+    <button type="button" data-weight="10" data-unit="g">10 جرام</button>
+    <button type="button" data-weight="100" data-unit="g">100 جرام</button>
+    <button type="button" data-weight="1" data-unit="kg">1 كيلو</button>
+  </div>
+  <div class="row">
+    <label>الوزن <input type="text" id="sv-weight" inputmode="decimal" placeholder="مثال: 100" autocomplete="off"></label>
+    <label>الوحدة <select id="sv-unit"><option value="g">جرام</option><option value="kg">كيلوجرام</option></select></label>
+    <label>العيار <select id="sv-purity">{{purity_options}}</select></label>
+  </div>
+  <fieldset class="quote">
+    <legend>عندك عرض سعر من بائع؟ (اختياري)</legend>
+    <div class="row">
+      <label>المبلغ بالريال <input type="text" id="sv-quote" inputmode="decimal" placeholder="مثال: 850" autocomplete="off"></label>
+      <label>هذا المبلغ <select id="sv-quote-basis">
+        <option value="total">إجمالي الكمية كلها</option>
+        <option value="per_gram">لكل جرام</option>
+      </select></label>
+    </div>
+    <p class="note">اختر بنفسك: لا نفترض أن الرقم لكل جرام أو للإجمالي.</p>
+  </fieldset>
+  <output id="sv-result" aria-live="polite">أدخل الوزن لعرض قيمة الفضة</output>
+  <p class="snapshot-note" id="sv-snapshot"></p>
 </section>
 
 <section>
-  <h2>سعر الفضة عيار 999 آخر 7 أيام</h2>
+  <h2>سعر الفضة عيار 999 في الأيام المسجّلة</h2>
   {{silver_history_table}}
 </section>
 
@@ -19,13 +48,12 @@
   <a href="/sa/zakat/">حاسبة زكاة الذهب والفضة ←</a>
 </aside>
 
-<aside class="other-metal">
+<aside class="other-metal gold">
   <strong>الذهب:</strong> سعر جرام الذهب عيار 21 اليوم {{g21}} ريال. <a href="/sa/">أسعار الذهب اليوم ←</a>
 </aside>
 
 <section>
   <h2>كيف نحسب سعر الفضة؟</h2>
-  <p class="note">تُكتب أحيانًا «سعر الفضه» بالهاء، والمقصود نفس السعر المعروض هنا.</p>
-  <p>نأخذ سعر أونصة الفضة في السوق العالمية بالدولار، ونحوّله إلى الريال (3.75 ريال لكل دولار)، ثم نقسمه على وزن الأونصة (31.1035 جرام)، ونضربه في نسبة نقاء الفضة (999 ÷ 1000 أو 925 ÷ 1000). أسعار المحلات أعلى عادةً بسبب المصنعية وهامش الربح.</p>
+  <p>نأخذ سعر أونصة الفضة في السوق العالمية بالدولار، ونحوّله إلى الريال (3.75 ريال لكل دولار)، ثم نقسمه على وزن الأونصة (31.1035 جرام)، ونضربه في نسبة النقاء (999 ÷ 1000 أو 925 ÷ 1000). <a href="/sa/methodology/">المنهجية كاملة ←</a></p>
 </section>
 <script type="application/json" id="prices">{{prices_json}}</script>

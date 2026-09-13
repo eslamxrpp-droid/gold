@@ -1,0 +1,60 @@
+<h1>Silver Price Today in Saudi Arabia</h1>
+<p class="lead">999 silver: <strong>SAR {{s999}}</strong> per gram · 1 kg: <strong>SAR {{s999_kg}}</strong> ·
+  <span class="{{s_direction_class}}">{{s_direction_arrow}} {{s_chg_day}}</span></p>
+<p class="updated">{{fresh_en}} · <span class="cmp">{{cmp_label}}</span></p>
+
+<section>
+  <h2>Silver price per gram, 10 g, 100 g, ounce and kilo bar</h2>
+  {{silver_table}}
+  <p>999 is investment-grade silver (bars and coins). 925 is sterling silver, 92.5% silver, the usual jewellery alloy — today SAR {{s925}} per gram.</p>
+</section>
+
+<section class="calc" id="silver-calc" data-metal="silver">
+  <h2>What is your silver worth?</h2>
+  <p class="note">This is the <strong>metal value</strong> at the market price. It is not a guaranteed shop price: a dealer adds a margin when selling to you and deducts one when buying from you.</p>
+  <div class="presets" role="group" aria-label="Common weights">
+    <button type="button" data-weight="1" data-unit="g">1 g</button>
+    <button type="button" data-weight="10" data-unit="g">10 g</button>
+    <button type="button" data-weight="100" data-unit="g">100 g</button>
+    <button type="button" data-weight="1" data-unit="kg">1 kg</button>
+  </div>
+  <div class="row">
+    <label>Weight <input type="text" id="sv-weight" inputmode="decimal" placeholder="e.g. 100" autocomplete="off"></label>
+    <label>Unit <select id="sv-unit"><option value="g">grams</option><option value="kg">kilograms</option></select></label>
+    <label>Purity <select id="sv-purity">{{purity_options_en}}</select></label>
+  </div>
+  <fieldset class="quote">
+    <legend>Comparing a seller's quote? (optional)</legend>
+    <div class="row">
+      <label>Amount in SAR <input type="text" id="sv-quote" inputmode="decimal" placeholder="e.g. 850" autocomplete="off"></label>
+      <label>That amount is <select id="sv-quote-basis">
+        <option value="total">the total for this weight</option>
+        <option value="per_gram">per gram</option>
+      </select></label>
+    </div>
+    <p class="note">You choose: we never assume a quote is per gram when it might be a total.</p>
+  </fieldset>
+  <output id="sv-result" aria-live="polite">Enter a weight to see the metal value</output>
+  <p class="snapshot-note" id="sv-snapshot"></p>
+</section>
+
+<section>
+  <h2>Recorded daily prices</h2>
+  {{silver_history_table}}
+</section>
+
+<aside class="other-metal">
+  <strong>Zakat:</strong> the silver nisab (595 g of pure silver) is worth SAR {{nisab_silver}} today.
+  The calculator and the cited scholarly positions are published in Arabic:
+  <a href="/sa/zakat/" hreflang="ar">حاسبة زكاة الذهب والفضة ←</a>
+</aside>
+
+<aside class="other-metal gold">
+  <strong>Gold:</strong> 21K gold is SAR {{g21}} per gram today. <a href="/sa/en/">Today's gold rate →</a>
+</aside>
+
+<section>
+  <h2>How the silver price is calculated</h2>
+  <p>The global price of one troy ounce of silver in US dollars, converted at 3.75 riyals per dollar, divided by 31.1035 grams, multiplied by the fineness (999 ÷ 1000 or 925 ÷ 1000). <a href="/sa/en/methodology/">Full methodology →</a></p>
+</section>
+<script type="application/json" id="prices">{{prices_json}}</script>
