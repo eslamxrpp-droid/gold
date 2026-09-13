@@ -1,42 +1,43 @@
 <h1>أسعار الذهب والفضة اليوم في السعودية</h1>
 <p class="lead">سعر جرام الذهب عيار 21 اليوم <strong>{{g21}} ريال</strong> · سعر جرام الفضة عيار 999 <strong>{{s999}} ريال</strong></p>
-<p class="updated">آخر تحديث: <bdi dir="ltr">{{updated}}</bdi> بتوقيت الرياض · يتحدّث تلقائيًا كل بضع دقائق</p>
+<p class="updated">{{fresh_ar}} · <span class="cmp">{{cmp_label}}</span></p>
 
 <section class="cards">
   <a class="card" href="/sa/">
     <strong>الذهب عيار 21</strong>
     <span class="big">{{g21}} ريال للجرام</span>
-    <span class="{{direction_class}}">{{direction_arrow}} {{direction_word}} {{chg_day}} مقارنة بأمس</span>
+    <span class="{{direction_class}}">{{direction_arrow}} {{direction_word}} {{chg_day}}</span>
   </a>
-  <a class="card" href="/sa/silver/">
+  <a class="card silver" href="/sa/silver/">
     <strong>الفضة عيار 999</strong>
     <span class="big">{{s999}} ريال للجرام</span>
-    <span class="{{s_direction_class}}">{{s_direction_arrow}} {{s_chg_day}} مقارنة بأمس</span>
+    <span class="{{s_direction_class}}">{{s_direction_arrow}} {{s_chg_day}}</span>
   </a>
 </section>
 
 <section>
   <h2>أسعار الذهب اليوم حسب العيار</h2>
   {{karat_table}}
-  <p><a href="/sa/">صفحة سعر الذهب اليوم: تغيّر الأسعار آخر 7 أيام ←</a></p>
+  <p><a href="/sa/">صفحة سعر الذهب اليوم: الأيام المسجّلة وتفاصيل كل عيار ←</a></p>
 </section>
 
 <section>
   <h2>أسعار الفضة اليوم</h2>
   {{silver_table}}
-  <p><a href="/sa/silver/">صفحة سعر الفضة اليوم ←</a></p>
+  <p><a href="/sa/silver/">صفحة سعر الفضة: الكيلو والسبيكة وحاسبة الفضة ←</a></p>
 </section>
 
 <section>
   <h2>كل الصفحات</h2>
   <div class="cards">
-    <a class="card" href="/sa/"><strong>سعر الذهب اليوم</strong><span>عيار 24 و22 و21 و18 بالريال، وتغيّر آخر 7 أيام</span></a>
-    <a class="card" href="/sa/up-or-down/"><strong>الذهب مرتفع ولا نازل؟</strong><span>التغير مقارنة بأمس وبالأسبوع الماضي لكل عيار</span></a>
-    <a class="card" href="/sa/sell-price/"><strong>سعر بيع الذهب</strong><span>سعر البيع والشراء وحاسبة الذهب المستعمل</span></a>
+    <a class="card" href="/sa/"><strong>سعر الذهب اليوم</strong><span>عيار 24 و22 و21 و18 بالريال، وحركة الأيام المسجّلة</span></a>
+    <a class="card" href="/sa/up-or-down/"><strong>الذهب مرتفع ولا نازل؟</strong><span>التغير مقابل آخر يوم مسجَّل وبالأسبوع، بتاريخ المقارنة</span></a>
+    <a class="card" href="/sa/sell-price/"><strong>سعر البيع والشراء</strong><span>الفرق بين ما تقبضه وما تدفعه، وحاسبة الذهب المستعمل</span></a>
     <a class="card" href="/sa/calculator/"><strong>حاسبة الذهب</strong><span>احسب قيمة ذهبك بالوزن والعيار</span></a>
     <a class="card" href="/sa/zakat/"><strong>زكاة الذهب والفضة</strong><span>النصاب اليوم بالريال وحاسبة الزكاة مع المصادر</span></a>
-    <a class="card" href="/sa/silver/"><strong>سعر الفضة اليوم</strong><span>عيار 999 و925 للجرام والأونصة والكيلو</span></a>
-    <a class="card" dir="ltr" href="/sa/en/"><strong>Gold rate in Saudi Arabia</strong><span>English page: per gram, 10 g, tola, ounce, SAR / INR / PKR</span></a>
+    <a class="card silver" href="/sa/silver/"><strong>سعر الفضة اليوم</strong><span>999 و925 للجرام والأونصة والكيلو، مع حاسبة</span></a>
+    <a class="card" href="/sa/methodology/"><strong>المنهجية</strong><span>من أين يأتي السعر، وكيف يُحوَّل، ومتى نتوقف عن النشر</span></a>
+    <a class="card" dir="ltr" href="/sa/en/"><strong>English</strong><span>Gold and silver prices in Saudi Arabia, in English</span></a>
   </div>
 </section>
 
@@ -44,5 +45,6 @@
   <h2>ما هذا الموقع؟</h2>
   <p><strong>مثقال</strong> موقع يعرض سعر الذهب والفضة اليوم في السعودية بالريال، ويتحدّث تلقائيًا من السوق العالمية. والمِثقال هو وحدة الوزن القديمة التي كان يُوزن بها الذهب والفضة، ومنه يُحسب نصاب الزكاة.</p>
   <p>الأسعار المعروضة هي سعر السوق العالمية محوّلًا إلى الريال (الريال مربوط بالدولار عند 3.75) ومقسومًا على وزن الأونصة (31.1035 جرام)، وليست أسعار المحلات. سعر المحل يشمل عادةً المصنعية وهامش الربح، وسعر شرائه للذهب المستعمل أقل من سعر السوق.</p>
+  <p>نكتب دائمًا وقت التسعيرة ومصدرها. إذا تعطّل المصدر أو صار السعر قديمًا، يظهر تنبيه أعلى الصفحة، ونوقف النشر بدل عرض رقم لا نثق به. <a href="/sa/methodology/">تفاصيل المنهجية ←</a></p>
 </section>
 <script type="application/json" id="prices">{{prices_json}}</script>

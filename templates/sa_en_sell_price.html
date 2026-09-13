@@ -1,0 +1,31 @@
+<h1>Gold buying and selling price in Saudi Arabia today</h1>
+<p class="updated">{{fresh_en}}</p>
+
+<section>
+  <h2>Bid and ask per karat</h2>
+  {{bid_ask_table}}
+  {{bid_note}}
+  <p><strong>Bid</strong> is what the market pays you when you sell; <strong>ask</strong> is what you pay when you buy. These are global market prices converted to riyals — a shop buying your used gold normally pays less than the bid shown here.</p>
+</section>
+
+<section class="calc" id="sell-calc" data-metal="gold">
+  <h2>What would a shop pay for used gold?</h2>
+  <div class="row">
+    <label>Weight (grams) <input type="text" id="sell-weight" inputmode="decimal" placeholder="e.g. 20" autocomplete="off"></label>
+    <label>Karat <select id="sell-karat">{{karat_options_en}}</select></label>
+    <label>Shop deduction (%) — ask the shop for theirs <input type="text" id="sell-deduction" inputmode="decimal" placeholder="0" autocomplete="off"></label>
+  </div>
+  <output id="sell-result" aria-live="polite">Enter a weight to see the value</output>
+  <p class="snapshot-note" id="sell-snapshot"></p>
+</section>
+
+<section>
+  <h2>Before you sell</h2>
+  <ul>
+    <li>Know the exact weight and the karat stamped on the piece.</li>
+    <li>Compare more than one shop's offer against the market value above.</li>
+    <li>The making charge you paid when buying is usually not recoverable when selling.</li>
+  </ul>
+  <p class="note">We do not know or publish any shop's deduction: the percentage in the calculator is a number you enter after asking.</p>
+</section>
+<script type="application/json" id="prices">{{prices_json}}</script>

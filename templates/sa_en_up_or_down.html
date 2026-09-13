@@ -1,0 +1,26 @@
+<h1>Is gold up or down today in Saudi Arabia?</h1>
+<div class="verdict {{direction_class}}">
+  <span class="big">{{direction_arrow}} {{direction_word}}</span>
+  <span>{{chg_day}} · {{cmp_label}}</span>
+</div>
+<p class="lead">21K is <strong>SAR {{g21}}</strong> per gram ·
+  <span class="{{week_class}}">{{chg_week}} · {{week_label}}</span></p>
+<p class="updated">{{fresh_en}}</p>
+
+<section>
+  <h2>Change in riyals per gram, by karat</h2>
+  {{change_table}}
+</section>
+
+<section>
+  <h2>Recorded daily prices</h2>
+  {{history_table}}
+  <p class="note">The global market pauses from Friday evening to Sunday evening, so weekend rows are usually flat.</p>
+</section>
+
+<section>
+  <h2>What "up" and "down" mean here</h2>
+  <p>We compare the current price with the most recent daily figure we hold, and we print its date next to the number. A move smaller than 0.05% counts as flat. If no earlier day is available we say so rather than quietly comparing against some other day.</p>
+  <p>This is a price comparison only. We do not forecast the gold price, explain why the market moved, or advise buying or selling.</p>
+</section>
+<script type="application/json" id="prices">{{prices_json}}</script>

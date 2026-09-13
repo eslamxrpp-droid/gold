@@ -12,16 +12,33 @@
 <link rel="icon" href="/static/icon-192.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 {{alternates}}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{site_name}}">
+<meta property="og:locale" content="{{og_locale}}">
+<meta property="og:title" content="{{og_title}}">
+<meta property="og:description" content="{{og_description}}">
+<meta property="og:url" content="{{og_url}}">
+<meta property="og:image" content="{{og_image}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{og_title}}">
+<meta name="twitter:description" content="{{og_description}}">
+<meta name="twitter:image" content="{{og_image}}">
 <link rel="stylesheet" href="{{css_url}}">
+{{structured_data}}
 </head>
-<body>
+<body data-page="{{page_key}}" data-locale="{{page_locale}}" data-snapshot="{{snapshot_url}}">
 {{sample_banner}}
-<div id="stale-notice" class="stale" role="status" hidden></div>
+<div id="stale-notice" class="banner stale" role="status" hidden></div>
+<div id="refresh-notice" class="banner refresh" role="status" hidden></div>
+<a class="skip" href="#main">تخطَّ إلى المحتوى / Skip to content</a>
 <header class="site">
-  <a class="brand" href="{{home}}">{{site_name}}</a>
-  <nav>{{nav}}</nav>
+  <div class="bar">
+    <a class="brand" href="{{home}}">{{site_name}}</a>
+    {{lang_switch}}
+  </div>
+  <nav class="primary" aria-label="Sections">{{nav}}</nav>
 </header>
-<main>
+<main id="main">
 {{content}}
 </main>
 {{footer}}

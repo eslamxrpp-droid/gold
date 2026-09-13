@@ -1,0 +1,20 @@
+<h1>Gold calculator: what your gold is worth today</h1>
+<p class="updated">{{fresh_en}} · 21K = SAR {{g21}} per gram</p>
+
+<section class="calc" id="value-calc" data-metal="gold">
+  <div class="row">
+    <label>Weight (grams) <input type="text" id="calc-weight" inputmode="decimal" placeholder="e.g. 10" autocomplete="off"></label>
+    <label>Karat <select id="calc-karat">{{karat_options_en}}</select></label>
+    <label>Making charge (SAR per gram, optional) <input type="text" id="calc-making" inputmode="decimal" placeholder="0" autocomplete="off"></label>
+  </div>
+  <output id="calc-result" aria-live="polite">Enter a weight to see the value</output>
+  <p class="snapshot-note" id="calc-snapshot"></p>
+</section>
+
+<section>
+  <h2>How it works</h2>
+  <p>Value = weight × today's per-gram price for that karat. A making charge, if you enter one, is added per gram to approximate what a shop would charge. The making charge is a number you ask the shop for — we do not know it and do not estimate it.</p>
+  <p>Today, per gram: 24K = SAR {{g24}} · 22K = SAR {{g22}} · 21K = SAR {{g21}} · 18K = SAR {{g18}}.</p>
+  <p><a href="/sa/en/silver/">Working with silver instead? Silver calculator →</a></p>
+</section>
+<script type="application/json" id="prices">{{prices_json}}</script>

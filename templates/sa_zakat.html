@@ -1,17 +1,17 @@
 <h1>حاسبة زكاة الذهب والفضة</h1>
-<p class="updated">الأسعار المستخدمة: آخر تحديث <bdi dir="ltr">{{updated}}</bdi> بتوقيت الرياض</p>
+<p class="updated">الأسعار المستخدمة: {{fresh_ar}}</p>
 <p class="note important">هذه حاسبة تعتمد على أقوال منشورة لأهل العلم مع ذكر مصادرها، وليست فتوى. عند الشك اسأل جهة الفتوى الموثوقة.</p>
 
 <section>
   <h2>كم نصاب زكاة الذهب اليوم بالريال؟</h2>
-  <table class="prices">
+  <div class="scroll"><table class="prices">
     <thead><tr><th>النصاب</th><th>قيمته اليوم (ريال)</th></tr></thead>
     <tbody>
       <tr><th>{{nisab_gold_85_label}} {{nisab_gold_85_refs}}</th><td>{{nisab_gold_85}}</td></tr>
       <tr><th>{{nisab_gold_92_label}} {{nisab_gold_92_refs}}</th><td>{{nisab_gold_92}}</td></tr>
       <tr><th>{{nisab_silver_label}} {{nisab_silver_refs}}</th><td>{{nisab_silver}}</td></tr>
     </tbody>
-  </table>
+  </table></div>
   <p class="note">{{silver_note}} {{silver_note_refs}}</p>
 </section>
 
@@ -54,6 +54,7 @@
   </ul>
   <h3>المصادر</h3>
   {{sources}}
+  <p class="note">هذه الصفحة بالعربية فقط. النسخة الإنجليزية لم تُنشر بعد: ترجمة أقوال أهل العلم تحتاج مراجعة لغوية وشرعية، ونشرها بلا مراجعة أسوأ من عدم نشرها.</p>
   <p class="note">راجعنا المصادر بتاريخ <bdi dir="ltr">{{reviewed}}</bdi>.</p>
 </section>
 <script type="application/json" id="prices">{{prices_json}}</script>
