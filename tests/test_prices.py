@@ -795,6 +795,19 @@ class PublicSnapshot(unittest.TestCase):
 
 
 class SampleAndLiveSeparation(unittest.TestCase):
+    def test_missing_route_document_does_not_impersonate_a_price_page(self):
+        # Cloudflare's root 404 file turns off its implicit homepage/SPA fallback.
+        html = SampleSite.html("404.html")
+        self.assertIn("Page not found", html)
+        self.assertIn("الصفحة غير موجودة", html)
+        self.assertIn('content="noindex, follow"', html)
+        self.assertNotIn('rel="canonical"', html)
+        self.assertNotIn("application/ld+json", html)
+        self.assertNotIn("404", (SampleSite.path() / "sitemap.xml").read_text(encoding="utf-8"))
+        for path in ("/sa/", "/sa/silver/", "/sa/en/", "/sa/en/silver/"):
+            self.assertIn(f'href="{path}"', html)
+            self.assertTrue((SampleSite.path() / path.strip("/") / "index.html").exists())
+
     def test_sample_build_is_marked_and_blocked(self):
         root = SampleSite.path()
         self.assertTrue((root / "SAMPLE-BUILD-DO-NOT-PUBLISH.txt").exists())
