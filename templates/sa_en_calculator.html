@@ -1,6 +1,65 @@
-<h1>Gold calculator: what your gold is worth today</h1>
-<p class="updated">{{fresh_en}} · 21K = SAR {{g21}} per gram</p>
+<div class="bullion-hero"><p class="eyebrow">MITHQAL / BULLION BUYER TOOLS</p><h1>Compare a bar offer with its metal value</h1><p>Start with weight and fineness, then add the dealer’s total price.</p><a href="#bullion-calc">Compare a bar offer ↓</a> · <a href="#value-calc">Calculate jewellery value ↓</a></div>
+<section class="calc bullion" id="bullion-calc" data-metal="gold" data-source="{{source}}">
+  <h2>Compare gold bar offers</h2>
+  <p class="note">A tool for comparing bullion offers. Bars are sold by fineness in parts per thousand (999 or 999.9), not by karat. This sets the offer you have beside the reference metal value at the market price. It does not pick a dealer and does not say when to buy.</p>
 
+  <div class="presets" role="group" aria-label="Common bar weights">
+    <button type="button" data-weight="10" data-unit="g">10 g</button>
+    <button type="button" data-weight="20" data-unit="g">20 g</button>
+    <button type="button" data-weight="50" data-unit="g">50 g</button>
+    <button type="button" data-weight="100" data-unit="g">100 g</button>
+    <button type="button" data-weight="1" data-unit="kg">1 kg</button>
+  </div>
+
+  <div class="row">
+    <p class="field">
+      <label for="bl-weight">Bar weight</label>
+      <input type="text" id="bl-weight" inputmode="decimal" value="10" placeholder="e.g. 100" autocomplete="off" aria-describedby="bl-weight-error">
+      <span class="field-error" id="bl-weight-error"></span>
+    </p>
+    <p class="field">
+      <label for="bl-unit">Unit</label>
+      <select id="bl-unit">
+        <option value="g" selected>grams</option>
+        <option value="kg">kilograms</option>
+      </select>
+    </p>
+    <p class="field">
+      <label for="bl-fineness">Fineness</label>
+      <select id="bl-fineness" aria-describedby="bl-fineness-note">
+        <option value="999">999 — that is 99.9% gold</option>
+        <option value="999.9" selected>999.9 — that is 99.99% gold</option>
+      </select>
+    </p>
+  </div>
+  <p class="note" id="bl-fineness-note">Fineness is parts per thousand: 999.9 means 99.99% gold, 999 means 99.9%. We do not treat "24K" as an exact synonym for 999.9, and we never apply a karat conversion and a fineness conversion together.</p>
+
+  <fieldset class="offers">
+    <legend>Dealer offers (optional)</legend>
+    <div class="row">
+      <p class="field">
+        <label for="bl-offer-a">Total offer price A (SAR)</label>
+        <input type="text" id="bl-offer-a" inputmode="decimal" placeholder="e.g. 20000" autocomplete="off" aria-describedby="bl-offers-note bl-offer-a-error">
+        <span class="field-error" id="bl-offer-a-error"></span>
+      </p>
+      <p class="field">
+        <label for="bl-offer-b">Total offer price B (SAR, optional)</label>
+        <input type="text" id="bl-offer-b" inputmode="decimal" placeholder="e.g. 19850" autocomplete="off" aria-describedby="bl-offers-note bl-offer-b-error">
+        <span class="field-error" id="bl-offer-b-error"></span>
+      </p>
+    </div>
+    <p class="note" id="bl-offers-note">Enter the <strong>total you would pay</strong> for the selected bar, including any charges the dealer adds — not a per-gram quote. Compare both offers on the same weight and the same fineness, and ask each dealer exactly what their number includes.</p>
+  </fieldset>
+
+  <div class="calc-out" id="bl-result">
+    <p class="bl-summary" id="bl-summary" role="status" aria-live="polite"></p>
+    <div id="bl-detail"></div>
+  </div>
+  <p class="snapshot-note" id="bl-snapshot"></p>
+
+  <p class="note important">The comparison here is against the <strong>reference metal value</strong> only. A difference from it may cover fabrication, the dealer's margin and other charges, and we do not know how that difference is made up. A total below the reference value is not proof of a bargain and not evidence of wrongdoing. We also do not assert that the amount you entered includes, or is exempt from, any particular tax — ask the dealer. And things other than the number matter first: the dealer's reliability, the bar's authenticity and assay certificate, delivery and storage, and the terms on which you could sell it back.</p>
+</section>
+<h2>Jewellery value calculator</h2>
 <section class="calc" id="value-calc" data-metal="gold">
   <div class="row">
     <label>Weight (grams) <input type="text" id="calc-weight" inputmode="decimal" placeholder="e.g. 10" autocomplete="off"></label>
@@ -17,4 +76,5 @@
   <p>Today, per gram: 24K = SAR {{g24}} · 22K = SAR {{g22}} · 21K = SAR {{g21}} · 18K = SAR {{g18}}.</p>
   <p><a href="/sa/en/silver/">Working with silver instead? Silver calculator →</a></p>
 </section>
+
 <script type="application/json" id="prices">{{prices_json}}</script>
