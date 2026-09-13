@@ -1570,3 +1570,905 @@ class EvidenceWording(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ---------------------------------------------------------------- gold bullion (session 12)
+
+def bullion(**kw):
+    """One call into the browser's own bullion function. The prices here are fictional and
+    round on purpose: they exist so a wrong formula shows up as a wrong whole number."""
+    payload = dict(weight="10", unit="g", fineness="999.9", offerA="", offerB="", goldSarG=500)
+    payload.update(kw)
+    return js(f"M.bullion({json.dumps(payload)})")
+
+
+class BullionArithmetic(unittest.TestCase):
+    """The bar comparison is the second calculation on this site a reader might act on with
+    money in hand, so every displayed figure is pinned. Fixture: pure gold 500 SAR/g."""
+
+    def test_the_reference_fixture(self):
+        r = bullion(weight="100", fineness="999", offerA="50949", offerB="50449.50")
+        self.assertEqual(r["grams"], 100)
+        self.assertAlmostEqual(r["fineGrams"], 99.9)
+        self.assertAlmostEqual(r["perGramFine"], 499.5)
+        self.assertAlmostEqual(r["reference"], 49950)
+        a, b = r["offers"]["a"], r["offers"]["b"]
+        self.assertAlmostEqual(a["premiumSar"], 999)
+        self.assertAlmostEqual(a["premiumPct"], 2)
+        self.assertAlmostEqual(a["perGram"], 509.49)
+        self.assertEqual(a["direction"], "above")
+        self.assertAlmostEqual(b["premiumSar"], 499.50)
+        self.assertAlmostEqual(b["premiumPct"], 1)
+        self.assertAlmostEqual(b["perGram"], 504.495)
+        self.assertEqual(r["compare"], {"lower": "b", "diffSar": 499.50})
+
+    def test_reference_matches_python_arithmetic(self):
+        """Same numbers, computed independently here: fine grams x SAR per pure gram."""
+        for grams, fineness in ((100, 999), (100, 999.9), (31.1035, 999), (1, 999.9)):
+            expected = grams * fineness / 1000 * 500
+            r = bullion(weight=str(grams), fineness=str(fineness))
+            self.assertAlmostEqual(r["reference"], expected, places=6,
+                                   msg=f"{grams} g at {fineness}")
+
+    def test_999_and_999_9_are_not_the_same_bar(self):
+        nine = bullion(weight="100", fineness="999")["reference"]
+        finer = bullion(weight="100", fineness="999.9")["reference"]
+        self.assertAlmostEqual(nine, 49950)
+        self.assertAlmostEqual(finer, 49995)
+        self.assertNotAlmostEqual(nine, finer)
+
+    def test_fineness_is_applied_once_and_never_as_a_karat(self):
+        """999.9 is not 24K and a bar is not karat-converted. Both of the wrong answers -
+        treating 999.9 as pure, and running a 24-karat conversion on top of the fineness -
+        are excluded by name."""
+        r = bullion(weight="100", fineness="999.9")
+        pure_gold_value = 100 * 500                       # what "999.9 == pure" would give
+        double_converted = 100 * 0.9999 * (24 / 24) * 0.9999 * 500
+        self.assertNotAlmostEqual(r["reference"], pure_gold_value)
+        self.assertNotAlmostEqual(r["reference"], double_converted, places=2)
+        self.assertAlmostEqual(r["reference"], 49995)
+
+    def test_a_kilo_is_a_thousand_grams(self):
+        kg = bullion(weight="1", unit="kg", fineness="999")
+        g = bullion(weight="1000", unit="g", fineness="999")
+        self.assertEqual(kg["grams"], 1000)
+        self.assertAlmostEqual(kg["reference"], 499500)
+        self.assertAlmostEqual(kg["reference"], g["reference"])
+
+    def test_kg_entries_hit_the_same_gram_ceiling(self):
+        self.assertFalse(bullion(weight="20000", unit="kg")["ok"])
+        self.assertFalse(bullion(weight="20000000", unit="g")["ok"])
+        self.assertTrue(bullion(weight="1", unit="kg")["ok"])
+
+    def test_a_blank_offer_is_absent_not_zero(self):
+        r = bullion(weight="100", fineness="999")
+        self.assertEqual(r["offers"]["a"]["state"], "absent")
+        self.assertEqual(r["offers"]["b"]["state"], "absent")
+        self.assertIsNone(r["compare"])
+        self.assertNotIn("premiumSar", r["offers"]["a"])
+        r = bullion(weight="100", fineness="999", offerA="   ")
+        self.assertEqual(r["offers"]["a"]["state"], "absent")
+
+    def test_a_zero_offer_is_an_error_not_a_free_bar(self):
+        r = bullion(weight="100", fineness="999", offerA="0")
+        self.assertEqual(r["offers"]["a"]["state"], "invalid")
+        self.assertEqual(r["offers"]["a"]["reason"], "zero")
+        self.assertNotIn("premiumSar", r["offers"]["a"])
+
+    def test_bad_input_is_refused_never_coerced_to_zero(self):
+        for bad, reason in (("1,2345", "unreadable"), ("abc", "unreadable"),
+                            ("-100", "negative"), ("", None)):
+            r = bullion(weight="100", fineness="999", offerA=bad)
+            o = r["offers"]["a"]
+            if reason is None:
+                self.assertEqual(o["state"], "absent", bad)
+            else:
+                self.assertEqual(o["state"], "invalid", bad)
+                self.assertEqual(o["reason"], reason, bad)
+
+    def test_a_bad_b_neither_hides_a_nor_crowns_it(self):
+        r = bullion(weight="100", fineness="999", offerA="50949", offerB="not a number")
+        self.assertEqual(r["offers"]["a"]["state"], "ok")
+        self.assertAlmostEqual(r["offers"]["a"]["premiumSar"], 999)
+        self.assertEqual(r["offers"]["b"]["state"], "invalid")
+        self.assertIsNone(r["compare"], "an unreadable B produced a comparison anyway")
+
+    def test_a_total_below_the_metal_value_says_below(self):
+        r = bullion(weight="100", fineness="999", offerA="49000")
+        a = r["offers"]["a"]
+        self.assertEqual(a["direction"], "below")
+        self.assertAlmostEqual(a["premiumSar"], -950)
+        self.assertAlmostEqual(a["premiumPct"], -950 / 49950 * 100)
+
+    def test_an_exact_match_says_equal(self):
+        a = bullion(weight="100", fineness="999", offerA="49950")["offers"]["a"]
+        self.assertEqual(a["direction"], "equal")
+        self.assertEqual(a["premiumSarShown"], 0)
+        self.assertEqual(a["premiumPctShown"], 0)
+
+    def test_a_difference_that_rounds_away_is_shown_as_equal_never_as_minus_zero(self):
+        """The display policy: the above/below/equal word is decided from the same 2 dp
+        figure the reader sees. Otherwise the page prints '-0.00 SAR below the metal
+        value', which is both contradictory and wrong."""
+        for offer in ("49949.999", "49950.001", "49949.9951"):
+            a = bullion(weight="100", fineness="999", offerA=offer)["offers"]["a"]
+            self.assertEqual(a["direction"], "equal", offer)
+            self.assertEqual(a["premiumSarShown"], 0, offer)
+            self.assertEqual(a["premiumPctShown"], 0, offer)
+        # round2 can legitimately return negative zero. What must never happen is a sign or
+        # a word coming out of it, so both are checked where they are actually produced.
+        self.assertTrue(js("1 / M.round2(-0.001) === -Infinity"))     # it really is -0
+        self.assertEqual(js("M.signState(M.round2(-0.001))"), "equal")
+        self.assertEqual(js("(function (x) { return x < 0 ? 'MINUS' : x > 0 ? 'PLUS' : ''; })"
+                            "(M.round2(-0.001))"), "")
+
+    def test_the_word_never_contradicts_the_rounded_figure(self):
+        for offer in ("49950.005", "49949.995", "49955", "49945"):
+            a = bullion(weight="100", fineness="999", offerA=offer)["offers"]["a"]
+            shown = a["premiumSarShown"]
+            self.assertEqual(a["direction"],
+                             "above" if shown > 0 else "below" if shown < 0 else "equal", offer)
+
+    def test_display_rounding_is_half_away_from_zero_on_the_shown_figures(self):
+        self.assertEqual(js("M.round2(504.495)"), 504.5)
+        self.assertEqual(js("M.round2(-504.495)"), -504.5)
+        self.assertEqual(js("M.round2(2.345)"), 2.35)
+        self.assertEqual(js("M.round2(-2.345)"), -2.35)
+        b = bullion(weight="100", fineness="999", offerB="50449.50")["offers"]["b"]
+        self.assertAlmostEqual(b["perGram"], 504.495)      # full precision kept
+        self.assertEqual(b["perGramShown"], 504.5)         # 504.50 on screen
+
+    def test_two_equal_totals_are_a_state_not_a_winner(self):
+        r = bullion(weight="100", fineness="999", offerA="50000", offerB="50000")
+        self.assertEqual(r["compare"], {"lower": "equal", "diffSar": 0})
+
+    def test_a_hairs_breadth_apart_reads_as_equal_rather_than_lower_by_nothing(self):
+        r = bullion(weight="100", fineness="999", offerA="50000", offerB="50000.001")
+        self.assertEqual(r["compare"]["lower"], "equal")
+        self.assertEqual(r["compare"]["diffSar"], 0)
+
+    def test_which_total_is_lower_is_decided_on_full_precision(self):
+        r = bullion(weight="100", fineness="999", offerA="50000.02", offerB="50000")
+        self.assertEqual(r["compare"]["lower"], "b")
+        self.assertEqual(r["compare"]["diffSar"], 0.02)
+
+    def test_an_unusable_snapshot_produces_no_figure_at_all(self):
+        """A missing or impossible gold price must not become NaN on the page, and must not
+        become a premium either: there is nothing to be a premium over."""
+        for bad in (None, 0, -5, "not a price", float("nan")):
+            payload = dict(weight="100", fineness="999", offerA="50949", offerB="", unit="g")
+            if bad != bad:                                  # NaN: JSON cannot carry it
+                r = js("M.bullion({weight:'100',unit:'g',fineness:'999',offerA:'50949',"
+                       "offerB:'',goldSarG:NaN})")
+            else:
+                r = bullion(goldSarG=bad, **{k: v for k, v in payload.items() if k != "goldSarG"})
+            self.assertTrue(r["ok"], repr(bad))
+            self.assertFalse(r["snapshotOk"], repr(bad))
+            self.assertIsNone(r["reference"], repr(bad))
+            self.assertIsNone(r["perGramFine"], repr(bad))
+            a = r["offers"]["a"]
+            self.assertEqual(a["state"], "ok", repr(bad))
+            self.assertNotIn("premiumSar", a)              # no premium over nothing
+            self.assertNotIn("direction", a)
+            self.assertAlmostEqual(a["perGram"], 509.49)   # this one needs no snapshot
+        self.assertEqual(js("M.bullion({weight:'100',unit:'g',fineness:'999',offerA:'50949',"
+                            "offerB:'',goldSarG:Infinity}).reference"), None)
+
+    def test_weights_that_are_not_weights(self):
+        for raw, reason in (("0", "zero"), ("-1", "negative"), ("", "empty"),
+                            ("1,2345", "invalid"), ("99999999", "huge")):
+            r = bullion(weight=raw)
+            self.assertFalse(r["ok"], raw)
+            self.assertEqual(r["weight"]["reason"], reason, raw)
+
+    def test_arabic_digits_work_here_too(self):
+        r = bullion(weight="١٠٠", fineness="999", offerA="٥٠٩٤٩")
+        self.assertEqual(r["grams"], 100)
+        self.assertAlmostEqual(r["offers"]["a"]["premiumSar"], 999)
+
+
+class BullionSection(unittest.TestCase):
+    """What the two calculator pages must actually say. The arithmetic can be right while
+    the page still promises something we cannot know."""
+
+    PAGES = ("sa/calculator/index.html", "sa/en/calculator/index.html")
+
+    def section(self, rel):
+        html = SampleSite.html(rel)
+        start = html.index('id="bullion-calc"')
+        return html[start:html.index("</section>", start)]
+
+    def test_the_tool_is_on_both_calculator_languages(self):
+        for rel in self.PAGES:
+            html = SampleSite.html(rel)
+            self.assertIn('id="bullion-calc"', html, rel)
+            for el in ("bl-weight", "bl-unit", "bl-fineness", "bl-offer-a", "bl-offer-b",
+                       "bl-summary", "bl-detail", "bl-snapshot"):
+                self.assertIn(f'id="{el}"', html, f"{rel} missing {el}")
+
+    def test_a_plain_fragment_link_makes_it_discoverable(self):
+        for rel in self.PAGES:
+            html = SampleSite.html(rel)
+            head = html[:html.index('id="bullion-calc"')]
+            self.assertIn('href="#bullion-calc"', head, f"{rel}: no link above the section")
+
+    def test_the_original_calculator_is_still_there(self):
+        for rel in self.PAGES:
+            html = SampleSite.html(rel)
+            for el in ('id="value-calc"', 'id="calc-weight"', 'id="calc-karat"',
+                       'id="calc-making"', 'id="calc-result"'):
+                self.assertIn(el, html, f"{rel} lost {el}")
+
+    def test_presets_are_buttons_and_cover_the_common_bars(self):
+        for rel in self.PAGES:
+            section = self.section(rel)
+            for preset in ('data-weight="10" data-unit="g"', 'data-weight="20" data-unit="g"',
+                           'data-weight="50" data-unit="g"', 'data-weight="100" data-unit="g"',
+                           'data-weight="1" data-unit="kg"'):
+                self.assertIn(preset, section, f"{rel} missing preset {preset}")
+            self.assertNotIn("<div class=\"presets\" onclick", section)
+            self.assertEqual(section.count('type="button"'), 5, rel)
+
+    def test_first_visit_defaults_are_visible_and_no_dealer_price_is_invented(self):
+        import re
+        for rel in self.PAGES:
+            section = self.section(rel)
+            self.assertRegex(section, r'id="bl-weight"[^>]*value="10"', rel)
+            self.assertIn('<option value="999.9" selected>', section, rel)
+            self.assertNotIn('<option value="999" selected>', section)
+            for offer in ("bl-offer-a", "bl-offer-b"):
+                tag = re.search(rf'<input[^>]*id="{offer}"[^>]*>', section).group(0)
+                self.assertNotIn(" value=", tag, f"{rel}: {offer} ships a prefilled price")
+                self.assertIn("placeholder=", tag)
+
+    def test_only_the_two_bar_finenesses_are_offered(self):
+        import re
+        for rel in self.PAGES:
+            section = self.section(rel)
+            select = re.search(r'<select id="bl-fineness"[^>]*>.*?</select>', section, re.S).group(0)
+            self.assertEqual(re.findall(r'value="([\d.]+)"', select), ["999", "999.9"], rel)
+
+    def test_the_offer_is_asked_for_as_a_total_and_only_as_a_total(self):
+        ar, en = (self.section(r) for r in self.PAGES)
+        self.assertIn("السعر الإجمالي للعرض أ (ريال)", ar)
+        self.assertIn("السعر الإجمالي للعرض ب (ريال، اختياري)", ar)
+        self.assertIn("Total offer price A (SAR)", en)
+        self.assertIn("Total offer price B (SAR, optional)", en)
+        for section in (ar, en):
+            self.assertNotIn("per_gram", section)          # no per-gram mode this iteration
+            self.assertIn("<fieldset", section)
+            self.assertIn("<legend", section)
+
+    def test_fineness_is_explained_and_24k_is_explicitly_not_a_synonym(self):
+        ar, en = (self.section(r) for r in self.PAGES)
+        self.assertIn("99.99", ar)
+        self.assertIn("99.9%", ar)
+        self.assertIn("«عيار 24»", ar)
+        self.assertIn("مرادف", ar)                          # ...is NOT an exact synonym
+        self.assertIn("99.99% gold", en)
+        self.assertIn('"24K"', en)
+        self.assertIn("exact synonym", en)
+
+    def test_the_page_says_what_it_does_not_know(self):
+        ar, en = (self.section(r) for r in self.PAGES)
+        for phrase in ("قيمة الذهب المرجعية", "التصنيع", "هامش البائع", "لا نعرف",
+                       "أصالة السبيكة", "ضريبة", "إعادة البيع"):
+            self.assertIn(phrase, ar, f"Arabic disclosure missing: {phrase}")
+        for phrase in ("reference metal value", "fabrication", "dealer's margin",
+                       "we do not know", "authenticity", "tax", "sell it back"):
+            self.assertIn(phrase, en, f"English disclosure missing: {phrase}")
+
+    def test_no_recommendation_language(self):
+        """Banned outright: anything that ranks a dealer, tells the reader to buy, or
+        invents a fair-price threshold. The words 'bargain' and 'wrongdoing' are allowed
+        only in the sentence that refuses to draw either conclusion, which is checked
+        separately below - so a lint on the bare word would be lying about what it tests."""
+        for rel in self.PAGES:
+            section = self.section(rel).lower()
+            for banned in ("best dealer", "best price", "we recommend", "you should buy",
+                           "expected return", "guaranteed", "fair price", "a good deal",
+                           "أفضل بائع", "ننصح بالشراء", "السعر العادل", "عائد متوقع",
+                           "صفقة مضمونة", "ربح مضمون"):
+                self.assertNotIn(banned, section, f"{rel} says {banned!r}")
+
+    def test_a_lower_total_is_not_called_a_bargain_or_a_scandal(self):
+        ar, en = (self.section(r) for r in self.PAGES)
+        self.assertIn("is not proof of a bargain and not evidence of wrongdoing", en)
+        self.assertIn("ليس دليل صفقة رابحة ولا دليل مخالفة", ar)
+        self.assertIn("does not pick a dealer and does not say when to buy", en)
+        self.assertIn("لا نرشّح بائعًا ولا نقول متى تشتري", ar)
+
+    def test_the_difference_is_never_coloured_good_or_bad(self):
+        """Green and red on this site mean the market moved up or down. A premium is not a
+        failing grade, so the bullion renderer may not borrow those classes."""
+        src = Path(CALC_JS).read_text(encoding="utf-8")
+        block = src[src.index("gold bullion offer comparison"):src.index("used-gold sell calculator")]
+        for banned in ("'up'", '"up"', "'down'", '"down"', "class='up", "class='down"):
+            self.assertNotIn(banned, block, f"bullion renderer emits {banned}")
+        css = (ROOT / "static" / "style.css").read_text(encoding="utf-8")
+        self.assertIn(".bl-diff", css)
+        rule = css[css.index(".bl-diff"):css.index("}", css.index(".bl-diff"))]
+        self.assertIn("var(--fg)", rule, "the difference line is not in the body colour")
+
+    def test_the_reader_is_told_which_snapshot_and_whose(self):
+        for rel in self.PAGES:
+            self.assertIn('id="bl-snapshot"', SampleSite.html(rel), rel)
+            self.assertIn("data-source=", self.section(rel), rel)
+        src = Path(CALC_JS).read_text(encoding="utf-8")
+        note = src[src.index("function bullionSnapshotNote"):]
+        note = note[:note.index("\n  }")]
+        self.assertIn("P.updated", note)                    # the QUOTE time
+        self.assertIn("quote_time_known", note)             # ...and the honest fallback
+        self.assertNotIn("generated_utc", note)             # never the build clock
+        self.assertNotIn("Date.parse", note)                # the quote time is never recomputed
+        block = src[src.index("gold bullion offer comparison"):src.index("used-gold sell calculator")]
+        self.assertNotIn("fetch(", block)                   # no second data source
+        # the block must not write the note itself - renderSnapshotNotes() owns it, which is
+        # what puts it on the freshness timer
+        self.assertNotIn('$("bl-snapshot")', block)
+        self.assertIn('$("bl-snapshot")', src[:src.index("gold bullion offer comparison")])
+
+    def test_every_field_error_is_wired_to_a_real_element(self):
+        """An aria-describedby pointing at an id that does not exist is a silent no-op: the
+        markup looks accessible and announces nothing. Every referenced id is checked to
+        exist, and every error slot to be present from the start rather than injected later
+        (a slot created at error time is not reliably picked up by assistive tech)."""
+        import re
+        for rel in self.PAGES:
+            html = SampleSite.html(rel)
+            section = self.section(rel)
+            ids = set(re.findall(r'id="([^"]+)"', html))
+            described = re.findall(r'<(?:input|select)[^>]*id="(bl-[^"]+)"[^>]*'
+                                   r'aria-describedby="([^"]+)"', section)
+            self.assertEqual({d[0] for d in described},
+                             {"bl-weight", "bl-fineness", "bl-offer-a", "bl-offer-b"}, rel)
+            for field, refs in described:
+                for ref in refs.split():
+                    self.assertIn(ref, ids, f"{rel}: {field} describes a missing #{ref}")
+            for field in ("bl-weight", "bl-offer-a", "bl-offer-b"):
+                self.assertIn(f'<span class="field-error" id="{field}-error"></span>', section,
+                              f"{rel}: {field} has no error slot in the markup")
+
+    def test_no_handler_can_return_before_it_has_saved(self):
+        """Review finding 1. Every calculator persists its scope BEFORE validation, because
+        an early return that skipped the save left the previous value in storage and a reload
+        resurrected a number the reader had deleted. Structural guard: in each handler the
+        save must come before the first `return`."""
+        src = Path(CALC_JS).read_text(encoding="utf-8")
+        handlers = {"upd": "vc", "updSell": "sc", "updSilver": "sv",
+                    "updZakat": "zc", "updBullion": "blc"}
+        for name, scope in handlers.items():
+            start = src.index(f"var {name} = function ()")
+            body = src[start:src.index("\n      };", start)]
+            save = body.find(f"saveInputs({scope})")
+            self.assertNotEqual(save, -1, f"{name} never saves")
+            first_return = body.find("return;")
+            if first_return != -1:
+                self.assertLess(save, first_return,
+                                f"{name} can return before saving: an emptied field would "
+                                f"survive a reload")
+            self.assertEqual(body.count(f"saveInputs({scope})"), 1,
+                             f"{name} saves more than once")
+
+    def test_the_market_sentence_is_not_frozen_at_load(self):
+        """Review finding 3. The quote time in the snapshot notes is fixed for the life of
+        the page; 'the market is closed at this time' is not - it is about the reader's
+        present, so it rides the same timer as the banner."""
+        src = Path(CALC_JS).read_text(encoding="utf-8")
+        self.assertIn("function renderSnapshotNotes()", src)
+        head = src[src.index("function renderSnapshotNotes()"):src.index("setInterval(function ()")]
+        self.assertIn("\n    renderSnapshotNotes();", head, "never painted at load")
+        timer = src[src.index("setInterval(function ()"):]
+        timer = timer[:timer.index("});")]
+        self.assertIn("renderSnapshotNotes()", timer)
+        visibility = src[src.index('document.addEventListener("visibilitychange"'):]
+        visibility = visibility[:visibility.index("});")]
+        self.assertIn("renderSnapshotNotes()", visibility)
+
+    def test_the_live_region_is_one_short_line_not_the_whole_result(self):
+        for rel in self.PAGES:
+            section = self.section(rel)
+            self.assertIn('id="bl-summary" role="status" aria-live="polite"', section, rel)
+            detail = section[section.index('id="bl-detail"'):]
+            self.assertNotIn("aria-live", detail, f"{rel}: the breakdown is a live region too")
+            # <output> is implicitly aria-live, so the results box must not be one
+            self.assertNotIn("<output", section, rel)
+
+    def test_the_tool_adds_no_route_and_no_tracking(self):
+        self.assertEqual(len(REG.PAGES), 14)
+        sitemap = (SampleSite.path() / "sitemap.xml").read_text(encoding="utf-8")
+        self.assertEqual(sitemap.count("<loc>"), 14)
+        self.assertNotIn("bullion", sitemap)
+        self.assertTrue((SampleSite.path() / "404.html").exists(), "root 404 stopped building")
+        src = Path(CALC_JS).read_text(encoding="utf-8")
+        block = src[src.index("gold bullion offer comparison"):src.index("used-gold sell calculator")]
+        self.assertNotIn("track(", block, "the bullion tool instruments the reader's amounts")
+
+    def test_the_other_shared_tools_still_build(self):
+        """calc.js is one file for the whole site. A change here that broke the silver,
+        sell or zakat calculator would be invisible on this page."""
+        for rel, marker in (("sa/silver/index.html", 'id="silver-calc"'),
+                            ("sa/en/silver/index.html", 'id="silver-calc"'),
+                            ("sa/sell-price/index.html", 'id="sell-calc"'),
+                            ("sa/en/sell-price/index.html", 'id="sell-calc"'),
+                            ("sa/zakat/index.html", 'id="zakat-calc"')):
+            self.assertIn(marker, SampleSite.html(rel), rel)
+
+
+class TwoToolsOnOnePageKeepTheirInputs(unittest.TestCase):
+    """The storage bug this feature would otherwise have shipped: saveInputs() REPLACED the
+    page's whole sessionStorage object with one scope's inputs, so typing in either tool
+    erased the other's saved values and a refresh restored half a form. Arithmetic tests
+    cannot see this - it only exists in a browser with a real sessionStorage - so this runs
+    the built page in one. It skips, loudly, where no browser is available."""
+
+    @classmethod
+    def setUpClass(cls):
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError:
+            raise unittest.SkipTest("playwright is not installed: the two-tool storage test "
+                                    "needs a browser (pip install playwright && playwright install chromium). "
+                                    "The manual procedure is in BULLION_IMPLEMENTATION_HANDOFF.md")
+        cls._pw = sync_playwright().start()
+        try:
+            cls.browser = cls._pw.chromium.launch()
+        except Exception as exc:
+            cls._pw.stop()
+            raise unittest.SkipTest(f"no chromium available for the storage test: {exc}")
+        # Served over HTTP, not file://. The pages load /static/calc.js by absolute path and
+        # sessionStorage is restricted on file:// - under file:// the whole class passes
+        # vacuously because no script ever runs, which is worse than not testing at all.
+        import functools
+        import threading
+        from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+
+        class Quiet(SimpleHTTPRequestHandler):
+            def log_message(self, *a):
+                pass
+
+        handler = functools.partial(Quiet, directory=str(SampleSite.path()))
+        cls._httpd = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        cls._thread = threading.Thread(target=cls._httpd.serve_forever, daemon=True)
+        cls._thread.start()
+        cls.base = f"http://127.0.0.1:{cls._httpd.server_address[1]}/"
+
+    @classmethod
+    def tearDownClass(cls):
+        if getattr(cls, "_httpd", None):
+            cls._httpd.shutdown()
+            cls._httpd.server_close()
+        if getattr(cls, "browser", None):
+            cls.browser.close()
+            cls._pw.stop()
+
+    def page_for(self, rel, gold_sar_g=None):
+        """gold_sar_g rewrites the embedded snapshot ON THE WIRE, so the fixture price
+        survives a reload and the page still reads exactly one snapshot - the same one it
+        would have read in production, with a different number in it."""
+        import re as _re
+        ctx = self.browser.new_context()
+        page = ctx.new_page()
+        if gold_sar_g is not None:
+            def rewrite(route):
+                resp = route.fetch()
+                body = _re.sub(r'"gold_sar_g": ?[0-9.]+', f'"gold_sar_g": {gold_sar_g}',
+                               resp.text())
+                route.fulfill(response=resp, body=body)
+            page.route("**/*.html", rewrite)
+        page.goto(self.base + rel)
+        page.wait_for_selector("#bl-summary")
+        return ctx, page
+
+    def test_each_tool_keeps_its_own_values_across_a_reload(self):
+        for rel in ("sa/calculator/index.html", "sa/en/calculator/index.html"):
+            ctx, page = self.page_for(rel)
+            try:
+                page.fill("#calc-weight", "37.5")
+                page.fill("#calc-making", "12")
+                page.select_option("#calc-karat", "18")
+                page.fill("#bl-weight", "250")
+                page.fill("#bl-offer-a", "131000")
+                page.fill("#bl-offer-b", "130500")
+                page.select_option("#bl-fineness", "999")
+                page.reload()
+                self.assertEqual(page.input_value("#calc-weight"), "37.5", rel)
+                self.assertEqual(page.input_value("#calc-making"), "12", rel)
+                self.assertEqual(page.input_value("#calc-karat"), "18", rel)
+                self.assertEqual(page.input_value("#bl-weight"), "250", rel)
+                self.assertEqual(page.input_value("#bl-offer-a"), "131000", rel)
+                self.assertEqual(page.input_value("#bl-offer-b"), "130500", rel)
+                self.assertEqual(page.input_value("#bl-fineness"), "999", rel)
+                # both tools recomputed from what came back, rather than sitting on their
+                # "enter a weight" prompt with values in the boxes
+                for out, prompt in (("#calc-result", "Enter a weight"),
+                                    ("#bl-result", "Enter a weight")):
+                    text = page.text_content(out).strip()
+                    self.assertTrue(text, f"{rel}: {out} is empty after a reload")
+                    self.assertNotIn(prompt, text, f"{rel}: {out} did not recompute")
+                    self.assertNotIn("أدخل الوزن", text, f"{rel}: {out} did not recompute")
+                    self.assertNotIn("NaN", text, rel)
+            finally:
+                ctx.close()
+
+    def test_typing_in_one_tool_does_not_wipe_the_other(self):
+        ctx, page = self.page_for("sa/calculator/index.html")
+        try:
+            page.fill("#bl-offer-a", "20500")
+            page.fill("#calc-weight", "8")          # the scope that used to clobber
+            stored = page.evaluate("JSON.parse(sessionStorage.getItem('mithqal:sa_calculator'))")
+            self.assertEqual(stored["bl-offer-a"], "20500")
+            self.assertEqual(stored["calc-weight"], "8")
+        finally:
+            ctx.close()
+
+    def test_clearing_a_field_is_not_undone_by_a_reload(self):
+        ctx, page = self.page_for("sa/calculator/index.html")
+        try:
+            page.fill("#bl-offer-a", "20500")
+            page.fill("#bl-offer-a", "")
+            page.reload()
+            self.assertEqual(page.input_value("#bl-offer-a"), "")
+            self.assertNotIn("20500", page.text_content("#bl-result"))
+        finally:
+            ctx.close()
+
+    def test_an_untouched_tool_shows_no_answer_to_an_unasked_question(self):
+        """restoreInputs() used to report success whenever ANY tool on the page had saved
+        something, which made an empty tool render a result."""
+        ctx, page = self.page_for("sa/calculator/index.html")
+        try:
+            page.fill("#bl-offer-a", "20500")
+            page.reload()
+            self.assertIn("Enter a weight", page.text_content("#calc-result")
+                          .replace("أدخل الوزن لعرض القيمة", "Enter a weight"))
+        finally:
+            ctx.close()
+
+    def test_the_page_computes_the_reference_on_a_first_visit(self):
+        for rel, needle in (("sa/calculator/index.html", "قيمة الذهب المرجعية"),
+                            ("sa/en/calculator/index.html", "Reference metal value")):
+            ctx, page = self.page_for(rel)
+            try:
+                self.assertEqual(page.input_value("#bl-weight"), "10")
+                self.assertEqual(page.input_value("#bl-fineness"), "999.9")
+                self.assertEqual(page.input_value("#bl-offer-a"), "")
+                self.assertIn(needle, page.text_content("#bl-result"), rel)
+                self.assertNotIn("NaN", page.text_content("#bl-result"), rel)
+            finally:
+                ctx.close()
+
+    def test_a_live_page_produces_the_fixture_numbers(self):
+        """End to end, through the real DOM: the snapshot is replaced with the fixture
+        price so the displayed strings can be pinned."""
+        ctx, page = self.page_for("sa/en/calculator/index.html", gold_sar_g=500)
+        try:
+            page.fill("#bl-weight", "100")
+            page.select_option("#bl-fineness", "999")
+            page.fill("#bl-offer-a", "50949")
+            page.fill("#bl-offer-b", "50449.50")
+            text = page.text_content("#bl-result")
+            for needle in ("49,950.00", "999.00", "+2.00%", "509.49",
+                           "499.50", "+1.00%", "504.50", "above the reference metal value"):
+                self.assertIn(needle, text, f"missing {needle} in: {text[:400]}")
+            self.assertIn("Offer B is the lower total, by 499.50 SAR", text)
+            self.assertNotIn("-0.00", text)
+            self.assertNotIn("NaN", text)
+        finally:
+            ctx.close()
+
+    def test_clearing_the_original_calculator_weight_survives_a_reload(self):
+        """Review finding 1, reproduced before the fix: enter a weight, enter a bullion
+        offer, clear the weight, reload - the weight came back. The early return skipped the
+        save, so storage still held the old value, and merging storage objects did not touch
+        that."""
+        for rel in ("sa/en/calculator/index.html", "sa/calculator/index.html"):
+            ctx, page = self.page_for(rel)
+            try:
+                page.fill("#calc-weight", "37.5")
+                page.fill("#bl-offer-a", "6000")
+                page.fill("#calc-weight", "")
+                page.reload()
+                page.wait_for_selector("#bl-summary")
+                self.assertEqual(page.input_value("#calc-weight"), "",
+                                 f"{rel}: a deleted weight came back")
+                self.assertEqual(page.input_value("#bl-offer-a"), "6000",
+                                 f"{rel}: the other tool lost its value")
+            finally:
+                ctx.close()
+
+    def test_making_a_valid_weight_invalid_is_not_undone_by_a_reload(self):
+        for rel in ("sa/en/calculator/index.html", "sa/calculator/index.html"):
+            ctx, page = self.page_for(rel)
+            try:
+                page.fill("#calc-weight", "37.5")
+                page.fill("#calc-weight", "abc")
+                page.fill("#bl-weight", "-4")
+                page.reload()
+                page.wait_for_selector("#bl-summary")
+                self.assertEqual(page.input_value("#calc-weight"), "abc", rel)
+                self.assertEqual(page.input_value("#bl-weight"), "-4", rel)
+            finally:
+                ctx.close()
+
+    def test_the_other_shared_calculators_no_longer_resurrect_cleared_weights(self):
+        """calc.js is one file: the same early-return pattern was in the sell and silver
+        handlers, and in zakat. Fixed there too rather than only where the review looked."""
+        for rel, field, other in (("sa/en/sell-price/index.html", "#sell-weight", "#sell-deduction"),
+                                  ("sa/sell-price/index.html", "#sell-weight", "#sell-deduction"),
+                                  ("sa/en/silver/index.html", "#sv-weight", "#sv-quote"),
+                                  ("sa/silver/index.html", "#sv-weight", "#sv-quote"),
+                                  ("sa/zakat/index.html", "#zs-weight", None)):
+            ctx = self.browser.new_context()
+            page = ctx.new_page()
+            try:
+                page.goto(self.base + rel)
+                page.wait_for_selector(field)
+                page.fill(field, "20")
+                if other:
+                    page.fill(other, "5")
+                page.fill(field, "")
+                page.reload()
+                page.wait_for_selector(field)
+                self.assertEqual(page.input_value(field), "", f"{rel}: {field} came back")
+                if other:
+                    self.assertEqual(page.input_value(other), "5", rel)
+            finally:
+                ctx.close()
+
+    def test_a_field_error_is_announced_associated_and_then_cleared(self):
+        """Review finding 2. The message has to be reachable FROM the input - a visible
+        paragraph near the result is not an association - and it has to go away again."""
+        for rel, bad_msg, ok_after in (("sa/en/calculator/index.html", "could not be read", "Offer A"),
+                                       ("sa/calculator/index.html", "لم نفهم مبلغ العرض", "العرض")):
+            ctx, page = self.page_for(rel)
+            try:
+                page.fill("#bl-offer-a", "1,2345")
+                self.assertEqual(page.get_attribute("#bl-offer-a", "aria-invalid"), "true", rel)
+                described = page.get_attribute("#bl-offer-a", "aria-describedby").split()
+                self.assertIn("bl-offer-a-error", described, rel)
+                self.assertIn(bad_msg, page.text_content("#bl-offer-a-error"), rel)
+                # focus is never taken away from whoever is typing
+                self.assertEqual(page.evaluate("() => document.activeElement.id"), "bl-offer-a", rel)
+
+                page.fill("#bl-offer-a", "20500")          # corrected
+                self.assertIsNone(page.get_attribute("#bl-offer-a", "aria-invalid"), rel)
+                self.assertEqual(page.text_content("#bl-offer-a-error"), "", rel)
+                self.assertFalse(page.locator("#bl-offer-a-error").is_visible(), rel)
+                self.assertIn(ok_after, page.text_content("#bl-detail"), rel)
+
+                page.fill("#bl-offer-a", "0")              # zero is an error, not "absent"
+                self.assertEqual(page.get_attribute("#bl-offer-a", "aria-invalid"), "true", rel)
+                page.fill("#bl-offer-a", "")               # blank optional offer clears it
+                self.assertIsNone(page.get_attribute("#bl-offer-a", "aria-invalid"), rel)
+                self.assertEqual(page.text_content("#bl-offer-a-error"), "", rel)
+            finally:
+                ctx.close()
+
+    def test_a_bad_offer_stays_flagged_while_the_weight_is_being_fixed(self):
+        ctx, page = self.page_for("sa/en/calculator/index.html")
+        try:
+            page.fill("#bl-offer-b", "abc")
+            page.fill("#bl-weight", "")                    # weight now invalid too
+            self.assertEqual(page.get_attribute("#bl-weight", "aria-invalid"), "true")
+            self.assertEqual(page.get_attribute("#bl-offer-b", "aria-invalid"), "true")
+            page.fill("#bl-offer-b", "")                   # corrected while weight still bad
+            self.assertIsNone(page.get_attribute("#bl-offer-b", "aria-invalid"))
+            page.fill("#bl-weight", "50")                  # weight fixed
+            self.assertIsNone(page.get_attribute("#bl-weight", "aria-invalid"))
+            self.assertEqual(page.text_content("#bl-weight-error"), "")
+        finally:
+            ctx.close()
+
+    def test_a_field_error_is_reachable_by_keyboard_without_losing_the_place(self):
+        ctx, page = self.page_for("sa/en/calculator/index.html")
+        try:
+            page.focus("#bl-offer-a")
+            page.keyboard.type("abc")
+            self.assertEqual(page.evaluate("() => document.activeElement.id"), "bl-offer-a")
+            page.keyboard.press("Tab")
+            self.assertEqual(page.evaluate("() => document.activeElement.id"), "bl-offer-b")
+            page.keyboard.press("Shift+Tab")               # back to the field with the error
+            self.assertEqual(page.evaluate("() => document.activeElement.id"), "bl-offer-a")
+            self.assertEqual(page.get_attribute("#bl-offer-a", "aria-invalid"), "true")
+        finally:
+            ctx.close()
+
+    def test_the_market_closed_sentence_follows_the_readers_clock(self):
+        """Review finding 3, the transition it named: a page left open across the weekly
+        reopening. The quote time must not move; the closed clause must go."""
+        from datetime import datetime, timedelta, timezone
+        probe_ctx, probe = self.page_for("sa/en/calculator/index.html")
+        try:
+            session = probe.evaluate(
+                "() => JSON.parse(document.getElementById('prices').textContent).market_session")
+        finally:
+            probe_ctx.close()
+
+        day = datetime(2026, 9, 1, tzinfo=timezone.utc)
+        while day.weekday() != session["open_weekday"]:
+            day += timedelta(days=1)
+        closed_at = day.replace(hour=max(0, session["open_hour"] - 1))
+        self.assertTrue(closed_at.hour < session["open_hour"])
+
+        ctx = self.browser.new_context()
+        page = ctx.new_page()
+        try:
+            page.clock.install(time=closed_at)
+            page.goto(self.base + "sa/en/calculator/index.html")
+            page.wait_for_selector("#bl-summary")
+            before = page.text_content("#bl-snapshot")
+            self.assertIn("The market is closed at this time.", before)
+            quoted = before.split("quoted ")[1].split(" Riyadh")[0]
+
+            page.clock.fast_forward("02:00:00")            # past the reopening
+            page.wait_for_function(
+                "() => !document.getElementById('bl-snapshot').textContent"
+                ".includes('market is closed')", timeout=5000)
+            after = page.text_content("#bl-snapshot")
+            self.assertNotIn("closed", after)
+            self.assertIn(quoted, after, "the quote time moved - it must never move")
+            self.assertIn("Reference: pure gold from", after)
+        finally:
+            ctx.close()
+
+    def test_the_other_snapshot_notes_unfreeze_too(self):
+        """The same one-shot bug was in the existing calculator, sell and silver notes."""
+        from datetime import datetime, timedelta, timezone
+        probe_ctx, probe = self.page_for("sa/en/calculator/index.html")
+        try:
+            session = probe.evaluate(
+                "() => JSON.parse(document.getElementById('prices').textContent).market_session")
+        finally:
+            probe_ctx.close()
+        day = datetime(2026, 9, 1, tzinfo=timezone.utc)
+        while day.weekday() != session["open_weekday"]:
+            day += timedelta(days=1)
+        closed_at = day.replace(hour=max(0, session["open_hour"] - 1))
+
+        for rel, note in (("sa/en/calculator/index.html", "#calc-snapshot"),
+                          ("sa/en/sell-price/index.html", "#sell-snapshot"),
+                          ("sa/en/silver/index.html", "#sv-snapshot")):
+            ctx = self.browser.new_context()
+            page = ctx.new_page()
+            try:
+                page.clock.install(time=closed_at)
+                page.goto(self.base + rel)
+                page.wait_for_selector(note)
+                self.assertIn("The market is closed at this time.",
+                              page.text_content(note), rel)
+                page.clock.fast_forward("02:00:00")
+                page.wait_for_function(
+                    f"() => !document.querySelector('{note}').textContent"
+                    ".includes('market is closed')", timeout=5000)
+            finally:
+                ctx.close()
+
+    def test_the_announcement_is_hidden_from_the_eye_but_not_from_a_screen_reader(self):
+        ctx, page = self.page_for("sa/en/calculator/index.html")
+        try:
+            # It takes no space on screen (the conclusion is not printed twice) ...
+            box = page.locator("#bl-summary").bounding_box()
+            self.assertLessEqual(box["width"], 1.5)
+            self.assertLessEqual(box["height"], 1.5)
+            css = page.eval_on_selector("#bl-summary", """e => {
+              const s = getComputedStyle(e);
+              return {display: s.display, visibility: s.visibility, clip: s.clipPath};
+            }""")
+            # ... but it is still rendered and still exposed, which display:none,
+            # visibility:hidden and the hidden attribute would all undo.
+            self.assertNotEqual(css["display"], "none")
+            self.assertNotEqual(css["visibility"], "hidden")
+            self.assertNotEqual(css["clip"], "none")
+            self.assertIsNone(page.get_attribute("#bl-summary", "aria-hidden"))
+            self.assertIsNone(page.get_attribute("#bl-summary", "hidden"))
+            self.assertTrue(page.text_content("#bl-summary").strip(), "nothing to announce")
+        finally:
+            ctx.close()
+
+    def test_an_impossible_weight_is_said_on_the_field_it_is_about(self):
+        """The live region is invisible, so an error that went only there would be an error
+        nobody sighted could read. It belongs on the field, not floating near the result."""
+        for rel, needle in (("sa/en/calculator/index.html", "cannot be negative"),
+                            ("sa/calculator/index.html", "لا يكون بالسالب")):
+            ctx, page = self.page_for(rel)
+            try:
+                page.fill("#bl-weight", "-5")
+                self.assertTrue(page.locator("#bl-weight-error").is_visible(), rel)
+                self.assertIn(needle, page.text_content("#bl-weight-error"), rel)
+                self.assertIn(needle, page.text_content("#bl-summary"), rel)
+                self.assertEqual(page.get_attribute("#bl-weight", "aria-invalid"), "true", rel)
+                self.assertEqual(page.text_content("#bl-detail").strip(), "", rel)
+                # ...and the results box does not sit there as an empty bordered panel
+                self.assertIn("is-empty", page.get_attribute("#bl-result", "class"), rel)
+                self.assertTrue(page.locator("#bl-summary").count(), "announcement removed")
+            finally:
+                ctx.close()
+
+    def test_an_unreadable_offer_is_flagged_on_its_own_field(self):
+        ctx, page = self.page_for("sa/en/calculator/index.html")
+        try:
+            page.fill("#bl-offer-a", "1,2345")
+            slot = page.locator("#bl-offer-a-error")
+            self.assertTrue(slot.is_visible())
+            self.assertIn("could not be read", slot.text_content())
+            self.assertEqual(page.get_attribute("#bl-offer-a", "aria-invalid"), "true")
+            self.assertFalse(page.locator("#bl-offer-b-error").is_visible())
+            self.assertIsNone(page.get_attribute("#bl-offer-b", "aria-invalid"))
+        finally:
+            ctx.close()
+
+    def test_presets_are_reachable_and_usable_from_the_keyboard(self):
+        ctx, page = self.page_for("sa/en/calculator/index.html")
+        try:
+            page.focus("#bl-weight")
+            page.keyboard.press("Shift+Tab")              # back into the preset row
+            focused = page.evaluate("() => document.activeElement.outerHTML")
+            self.assertIn("data-weight", focused, f"focus landed on {focused[:80]}")
+            page.keyboard.press("Enter")
+            self.assertEqual(page.input_value("#bl-weight"), "1")
+            self.assertEqual(page.input_value("#bl-unit"), "kg")
+            self.assertIn("1,000 g", page.text_content("#bl-result"))
+        finally:
+            ctx.close()
+
+    def test_changing_the_fineness_moves_the_reference_and_keeps_the_basis_visible(self):
+        ctx, page = self.page_for("sa/en/calculator/index.html", gold_sar_g=500)
+        try:
+            page.fill("#bl-weight", "100")
+            page.fill("#bl-offer-a", "50000")
+            page.select_option("#bl-fineness", "999")
+            self.assertIn("49,950.00", page.text_content("#bl-result"))
+            self.assertIn("999 (99.9%)", page.text_content("#bl-result"))
+            page.select_option("#bl-fineness", "999.9")
+            text = page.text_content("#bl-result")
+            self.assertIn("49,995.00", text)               # the reference really moved
+            self.assertIn("999.9 (99.99%)", text)          # and the basis is still on screen
+            self.assertIn("100 g", text)
+            self.assertIn("5.00 SAR above", text)          # 50,000 - 49,995
+        finally:
+            ctx.close()
+
+    def test_arabic_figures_are_isolated_so_a_sign_cannot_wander(self):
+        ctx, page = self.page_for("sa/calculator/index.html", gold_sar_g=500)
+        try:
+            page.fill("#bl-weight", "100")
+            page.select_option("#bl-fineness", "999")
+            page.fill("#bl-offer-a", "49000")              # a below-reference total
+            self.assertEqual(page.get_attribute("html", "dir"), "rtl")
+            html = page.inner_html("#bl-detail")
+            self.assertIn("<bdi>", html)
+            self.assertIn("\u2212950.00", html.replace("&minus;", "\u2212"))
+            self.assertIn("أقل من قيمة الذهب المرجعية", html)
+            # every signed figure sits inside its own bdi
+            import re as _re
+            for sign in ("\u2212950.00", "\u22121.90%"):
+                self.assertRegex(html, _re.escape("<bdi>" + sign))
+        finally:
+            ctx.close()
+
+    def test_the_original_calculator_still_answers(self):
+        ctx, page = self.page_for("sa/en/calculator/index.html", gold_sar_g=500)
+        try:
+            page.fill("#calc-weight", "10")
+            page.select_option("#calc-karat", "24")
+            self.assertIn("5,000.00", page.text_content("#calc-result"))
+            page.fill("#calc-making", "20")
+            self.assertIn("5,200.00", page.text_content("#calc-result"))
+            self.assertNotIn("NaN", page.text_content("#calc-result"))
+        finally:
+            ctx.close()
+
+    def test_a_bad_offer_b_leaves_a_standing_and_names_no_winner(self):
+        ctx, page = self.page_for("sa/en/calculator/index.html")
+        try:
+            page.fill("#bl-weight", "100")
+            page.fill("#bl-offer-a", "50949")
+            page.fill("#bl-offer-b", "1,2345")
+            detail = page.text_content("#bl-detail")
+            self.assertIn("Offer A", detail)
+            self.assertIn("could not be read", page.text_content("#bl-offer-b-error"))
+            self.assertNotIn("lower total", page.text_content("#bl-result"))
+            self.assertNotIn("NaN", page.text_content("#bl-result"))
+        finally:
+            ctx.close()

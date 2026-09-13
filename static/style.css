@@ -255,3 +255,68 @@ header.site a:focus-visible,footer.site a:focus-visible{outline-color:var(--gold
 /* A closed market is information, not a fault: it gets its own quiet colour so it does not
    read like the red stale warning, which really is a fault. */
 .banner.closed{background:#f3f1ea;color:#4a4234;border-bottom:1px solid var(--line-strong)}
+
+/* ---------- gold bullion comparison (session 12) ----------
+   A second tool on the calculator page. It reuses the .calc shell so the two look like
+   one family, and adds only what is genuinely new: a results box that is not an <output>
+   (so the live region can be a single short line instead of the whole table), a plain
+   two-column breakdown, and a difference line with NO green/red. A premium is not a
+   failing grade and a discount is not a win, so the figure is set in the body colour and
+   the word beside it carries the meaning. */
+.jump{margin-block:6px 18px;font-size:.95rem}
+#bullion-calc{border-color:var(--gold-lt);background:var(--gold-soft)}
+#bullion-calc h2{margin-block:0 10px;border-bottom-color:#efe3c4}
+#bullion-calc .presets button:hover{border-color:var(--gold);color:var(--gold)}
+#bullion-calc .presets button:active{background:var(--gold-soft)}
+.calc fieldset.offers{padding:4px 16px 12px}
+.calc .calc-out{display:block;margin-top:12px;padding:14px;background:#fff;
+  border:1px solid var(--line);border-radius:10px;font-size:1.04rem}
+/* Visually hidden, not display:none - a screen reader must still reach it. Everything it
+   says is on screen in #bl-detail, so showing it too would state the conclusion twice. */
+.bl-summary{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap;border:0}
+#bl-detail:empty{display:none}
+#bl-detail>:first-child{margin-top:0}
+table.bl-table{width:100%;border-collapse:collapse;margin-top:10px;font-variant-numeric:tabular-nums}
+table.bl-table th,table.bl-table td{padding:6px 8px;border-bottom:1px solid var(--line);
+  text-align:start;font-size:.97rem}
+table.bl-table th{font-weight:400;color:var(--muted);white-space:normal}
+table.bl-table td{font-weight:700;white-space:nowrap}
+.bl-offer{margin-block:12px 0;padding-top:10px;border-top:1px solid var(--line);font-size:.97rem}
+.bl-offer .bl-diff{display:inline-block;margin-top:2px;font-variant-numeric:tabular-nums;
+  color:var(--fg);font-weight:400}
+.bl-compare{margin-block:10px 0;padding:9px 12px;background:var(--panel);
+  border:1px solid var(--line);border-radius:8px;font-size:.94rem}
+@media(max-width:480px){
+  table.bl-table th,table.bl-table td{padding:6px 4px;font-size:.92rem}
+  #bullion-calc{padding-inline:14px}
+}
+
+/* ---------- field-level validation (session 12, review correction 2) ----------
+   Each input owns a stable error slot its aria-describedby already points at. Empty is the
+   normal state and collapses; a message makes it visible next to the field it is about.
+   Red here is an input error, not a price direction - the difference figure stays neutral. */
+.calc .row .field{flex:1 1 180px;margin-block:0}
+.calc .row .field label{margin-block:8px 0}
+.field-error{display:block;margin-top:5px;color:var(--down);font-weight:700;font-size:.88rem;
+  line-height:1.5}
+.field-error:empty{display:none}
+.calc input[aria-invalid="true"],.calc select[aria-invalid="true"]{border-color:var(--down);
+  border-width:2px}
+.calc .calc-out.is-empty{padding:0;border:0;background:none;margin-top:0}
+
+/* Local Stitch adaptation: scoped to bilingual calculator pages. */
+body[data-page$="calculator"]{background:#faf9f4}
+.bullion-hero{padding-block:32px 24px;max-width:740px}
+.bullion-hero .eyebrow{color:var(--gold);font-weight:700;font-size:.82rem;letter-spacing:.06em;margin:0}
+.bullion-hero h1{font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.3;margin-block:12px}
+.bullion-hero>p:not(.eyebrow){color:var(--muted);margin-block:8px}
+body[data-page$="calculator"] #bullion-calc{background:#fff;border:1px solid var(--line-strong);border-top:3px solid var(--gold);border-radius:16px;padding:24px;box-shadow:0 8px 30px #47350008}
+#bullion-calc .presets{gap:10px;margin-block:20px}
+#bullion-calc .presets button{min-height:44px;border-radius:8px;font-weight:700}
+#bullion-calc input,#bullion-calc select{min-height:48px;background:#faf9f4;width:100%;max-width:none}
+#bullion-calc .offers{margin-block:24px;background:#f5f4ef;border-color:var(--line);border-radius:12px}
+#bullion-calc .calc-out:not(.is-empty){background:#fbf5e6;border-color:#e1d2a9;padding:20px;border-radius:12px}
+#bullion-calc .important{border-inline-start:3px solid var(--line-strong);padding-inline-start:14px;margin-top:22px}
+#bullion-calc .snapshot-note{font-size:.9rem}
+@media(max-width:540px){.bullion-hero{padding-block:22px 16px}body[data-page$="calculator"] #bullion-calc{padding:16px}#bullion-calc .row{flex-direction:column}#bullion-calc .row .field{flex:auto;width:100%}#bullion-calc .calc-out:not(.is-empty){padding:12px}}

@@ -1,6 +1,65 @@
-<h1>حاسبة الذهب: احسب قيمة ذهبك اليوم</h1>
-<p class="updated">{{fresh_ar}} · عيار 21 = {{g21}} ريال/جرام</p>
+<div class="bullion-hero"><p class="eyebrow">مثقال / أدوات شراء السبائك</p><h1>قارن عرض السبيكة بقيمة الذهب</h1><p>الوزن والنقاء أولًا، ثم السعر الإجمالي من البائع.</p><a href="#bullion-calc">ابدأ مقارنة السبيكة ↓</a> · <a href="#value-calc">حساب قيمة المشغولات الذهبية ↓</a></div>
+<section class="calc bullion" id="bullion-calc" data-metal="gold" data-source="{{source}}">
+  <h2>مقارنة عروض سبائك الذهب</h2>
+  <p class="note">أداة لمقارنة عروض السبائك. السبائك تُباع بالنقاء بالألف (999 أو 999.9)، لا بالعيار. نضع العرض الذي بيدك بجانب قيمة الذهب المرجعية بسعر السوق، ولا نرشّح بائعًا ولا نقول متى تشتري.</p>
 
+  <div class="presets" role="group" aria-label="أوزان سبائك جاهزة">
+    <button type="button" data-weight="10" data-unit="g">10 جرام</button>
+    <button type="button" data-weight="20" data-unit="g">20 جرام</button>
+    <button type="button" data-weight="50" data-unit="g">50 جرام</button>
+    <button type="button" data-weight="100" data-unit="g">100 جرام</button>
+    <button type="button" data-weight="1" data-unit="kg">1 كيلو</button>
+  </div>
+
+  <div class="row">
+    <p class="field">
+      <label for="bl-weight">وزن السبيكة</label>
+      <input type="text" id="bl-weight" inputmode="decimal" value="10" placeholder="مثال: 100" autocomplete="off" aria-describedby="bl-weight-error">
+      <span class="field-error" id="bl-weight-error"></span>
+    </p>
+    <p class="field">
+      <label for="bl-unit">الوحدة</label>
+      <select id="bl-unit">
+        <option value="g" selected>جرام</option>
+        <option value="kg">كيلوجرام</option>
+      </select>
+    </p>
+    <p class="field">
+      <label for="bl-fineness">نقاء السبيكة</label>
+      <select id="bl-fineness" aria-describedby="bl-fineness-note">
+        <option value="999">999 — أي 99.9% ذهب</option>
+        <option value="999.9" selected>999.9 — أي 99.99% ذهب</option>
+      </select>
+    </p>
+  </div>
+  <p class="note" id="bl-fineness-note">النقاء بالألف: 999.9 تعني 99.99% ذهب، و999 تعني 99.9%. لا نعامل «عيار 24» كمرادف دقيق لـ999.9، ولا نطبّق تحويل عيار وتحويل نقاء معًا.</p>
+
+  <fieldset class="offers">
+    <legend>عروض البائعين (اختيارية)</legend>
+    <div class="row">
+      <p class="field">
+        <label for="bl-offer-a">السعر الإجمالي للعرض أ (ريال)</label>
+        <input type="text" id="bl-offer-a" inputmode="decimal" placeholder="مثال: 20000" autocomplete="off" aria-describedby="bl-offers-note bl-offer-a-error">
+        <span class="field-error" id="bl-offer-a-error"></span>
+      </p>
+      <p class="field">
+        <label for="bl-offer-b">السعر الإجمالي للعرض ب (ريال، اختياري)</label>
+        <input type="text" id="bl-offer-b" inputmode="decimal" placeholder="مثال: 19850" autocomplete="off" aria-describedby="bl-offers-note bl-offer-b-error">
+        <span class="field-error" id="bl-offer-b-error"></span>
+      </p>
+    </div>
+    <p class="note" id="bl-offers-note">أدخل <strong>إجمالي ما ستدفعه</strong> للسبيكة المختارة، شاملًا أي رسوم يضيفها البائع — لا سعر الجرام. قارن العرضين على نفس الوزن ونفس النقاء، واسأل كل بائع عمّا يشمله مبلغه بالضبط.</p>
+  </fieldset>
+
+  <div class="calc-out" id="bl-result">
+    <p class="bl-summary" id="bl-summary" role="status" aria-live="polite"></p>
+    <div id="bl-detail"></div>
+  </div>
+  <p class="snapshot-note" id="bl-snapshot"></p>
+
+  <p class="note important">المقارنة هنا مع <strong>قيمة الذهب المرجعية</strong> فقط. الفرق عنها قد يعود إلى التصنيع وهامش البائع ورسوم أخرى، ونحن لا نعرف تركيبة هذا الفرق. مبلغ أقل من القيمة المرجعية ليس دليل صفقة رابحة ولا دليل مخالفة. ولا نؤكد أن المبلغ الذي أدخلته يشمل ضريبة معيّنة أو معفى منها — اسأل البائع. وقبل المبلغ تهم أمور أخرى: موثوقية البائع، أصالة السبيكة وشهادتها، التسليم والتخزين، وشروط إعادة البيع.</p>
+</section>
+<h2>حاسبة المشغولات الذهبية</h2>
 <section class="calc" id="value-calc" data-metal="gold">
   <div class="row">
     <label>الوزن (جرام) <input type="text" id="calc-weight" inputmode="decimal" placeholder="مثال: 10" autocomplete="off"></label>
@@ -17,4 +76,5 @@
   <p>أسعار اليوم لكل جرام: عيار 24 = {{g24}} · عيار 22 = {{g22}} · عيار 21 = {{g21}} · عيار 18 = {{g18}} ريال.</p>
   <p><a href="/sa/silver/">تريد حساب الفضة؟ حاسبة الفضة ←</a></p>
 </section>
+
 <script type="application/json" id="prices">{{prices_json}}</script>
