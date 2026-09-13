@@ -34,7 +34,8 @@
   --ink:#15120c;         /* header + footer band */
   --ink-fg:#e7dcc2;
   --ink-muted:#b0a68e;
-  --gold:#9a7418;        /* accent on light */
+  --gold:#856313;        /* accent on light. 5.5:1 on the page and 5.1:1 on the gold panel:
+                            the old #9a7418 was 4.26 and 3.95, i.e. below AA for body text */
   --gold-lt:#d9b95c;     /* accent on dark */
   --gold-soft:#fbf5e6;
   --up:#0b6b3c; --down:#b02a20; --flat:#6f6757;
@@ -47,23 +48,40 @@ body{margin:0;background:var(--bg);color:var(--fg);line-height:1.75;font-size:17
   -webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased}
 main{max-width:900px;margin-inline:auto;padding-inline:20px}
 a{color:var(--gold)}
-a:hover{color:#6f5310}
+a:hover{color:#5c440d}
 
 /* ---------- notices (kept loud on purpose) ---------- */
 .sample{background:#fff3cd;color:#664d03;text-align:center;padding:6px 16px;font-weight:700}
-.stale{background:#fdecea;color:#8a1c13;border-bottom:1px solid #f3c4bf;text-align:center;padding:8px 16px;font-weight:700}
+.banner{text-align:center;padding:8px 16px;font-weight:700;font-size:.95rem}
+.banner.stale{background:#fdecea;color:#8a1c13;border-bottom:1px solid #f3c4bf}
+.banner.refresh{background:#eef4fb;color:#15406e;border-bottom:1px solid #cddff0}
+.banner.refresh button{font:inherit;font-weight:700;margin-inline-start:8px;padding:4px 14px;
+  border:0;border-radius:999px;background:#15406e;color:#fff;cursor:pointer}
+.skip{position:absolute;inset-inline-start:-9999px;background:var(--ink);color:var(--ink-fg);
+  padding:10px 16px;z-index:10}
+.skip:focus{inset-inline-start:0;inset-block-start:0}
 
 /* ---------- header band ---------- */
 header.site{display:block;max-width:none;margin:0;padding:0;border:0;background:var(--ink);position:relative}
 header.site::after{content:"";display:block;height:2px;
   background:linear-gradient(90deg,#4a3a10,var(--gold-lt) 45%,#4a3a10)}
-.brand,header.site nav{max-width:900px;margin-inline:auto;padding-inline:20px}
-.brand{display:flex;align-items:center;gap:10px;color:var(--ink-fg);font-weight:700;
+.bar,header.site nav{max-width:900px;margin-inline:auto;padding-inline:20px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+a.lang{flex:0 0 auto;color:var(--ink-fg);text-decoration:none;font-size:.85rem;font-weight:700;
+  border:1px solid #4a3f24;border-radius:999px;padding:9px 16px;white-space:nowrap;line-height:1}
+a.lang:hover{color:#fff;border-color:var(--gold-lt)}
+.brand{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:10px;color:var(--ink-fg);font-weight:700;
   font-size:1.22rem;text-decoration:none;padding-block:16px 8px;letter-spacing:.1px}
 .brand:hover{color:#f3e6c8}
 .brand::before{content:"";width:26px;height:26px;flex:0 0 26px;
   background:no-repeat center/contain url("data:image/svg+xml;charset=utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d9b95c' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><path d='M12 4v15'/><path d='M7.5 19h9'/><path d='M4 8h16'/><circle cx='12' cy='5.6' r='1.5' fill='%23d9b95c' stroke='none'/><path d='M4 8 1.4 13.6h5.2z'/><path d='M20 8l2.6 5.6h-5.2z'/></svg>")}
-header.site nav{display:flex;flex-wrap:wrap;gap:0 2px;padding-block:0 2px}
+/* One row, scrolled sideways if it must be, rather than three stacked lines. The old
+   seven-item Arabic nav wrapped to three rows on a phone and ate 23% of the screen before
+   the reader saw a price. The secondary pages moved to the cards and the footer index. */
+header.site nav{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:0 2px;padding-block:0 2px;
+  scrollbar-width:none;-ms-overflow-style:none}
+header.site nav::-webkit-scrollbar{display:none}
+header.site nav a{flex:0 0 auto}
 header.site nav a{color:var(--ink-muted);text-decoration:none;font-size:.92rem;
   padding:6px 10px 10px;border-bottom:2px solid transparent}
 header.site nav a:hover{color:#f0e4c6}
@@ -119,7 +137,14 @@ table.prices{width:100%;border-collapse:collapse;background:transparent;font-var
 .prices td{font-size:1.03rem}
 .prices th,.prices td{white-space:nowrap}
 .prices tbody th,.prices thead th{white-space:normal}
-section{overflow-x:auto}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.prices caption{text-align:start;color:var(--muted);font-size:.8rem;padding-bottom:6px}
+tr.live td{background:var(--gold-soft)}
+.tag{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--gold);background:var(--gold-soft);border:1px solid #efe3c4;border-radius:999px;padding:1px 7px;
+  vertical-align:middle}
+table.method td{white-space:normal;font-size:.95rem}
+table.method tbody th{min-width:7em}
 bdi{white-space:nowrap}
 
 .other-metal{display:block;background:var(--panel);border:1px solid var(--line);
@@ -128,10 +153,12 @@ bdi{white-space:nowrap}
 /* ---------- calculators ---------- */
 .calc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-block:22px}
 .calc label{display:block;margin-block:8px;font-weight:700}
-.calc label.inline{display:inline-block;font-weight:400;margin-inline-end:16px}
-.calc input[type=number],.calc select{display:block;width:100%;max-width:320px;padding:9px 11px;
+.calc label.inline{display:inline-flex;align-items:center;gap:8px;font-weight:400;
+  margin-inline-end:16px;min-height:44px}                /* a real touch target, not a 13px dot */
+.calc input[type=radio]{width:20px;height:20px;accent-color:var(--gold);margin:0}
+.calc input,.calc select{display:block;width:100%;max-width:320px;padding:9px 11px;
   font:inherit;font-size:1rem;border:1px solid var(--line-strong);border-radius:8px;margin-top:4px;background:#fff}
-.calc input[type=number]:focus,.calc select:focus{outline:2px solid var(--gold);outline-offset:1px}
+.calc input:focus,.calc select:focus{outline:2px solid var(--gold);outline-offset:1px}
 .calc .row{display:flex;flex-wrap:wrap;gap:0 16px}
 .calc .row label{flex:1 1 180px}
 .calc fieldset{border:1px solid var(--line);border-radius:10px;margin-block:12px;background:#fff}
@@ -164,3 +191,67 @@ footer.site a{color:var(--gold-lt)}
   header.site nav a{font-size:.88rem;padding:6px 8px 9px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---------- silver: a second metal needs a second accent ----------
+   Gold stays the brand accent. Silver gets a cool grey so a reader can tell the
+   two metals apart at a glance without either one looking like a warning. Both
+   accent colours are used as hairlines and rules only, never as text on colour,
+   so contrast never depends on them. */
+:root{--silver:#4d5966;--silver-lt:#aab4c0;--silver-soft:#f1f4f7}
+.card.silver:has(.big)::before{background:linear-gradient(90deg,var(--silver-lt),var(--silver))}
+.card.silver strong{color:var(--silver)}
+.other-metal.silver{border-inline-start:3px solid var(--silver-lt);background:var(--silver-soft)}
+.other-metal.gold{border-inline-start:3px solid var(--gold-lt);background:var(--gold-soft)}
+#silver-calc{border-color:var(--silver-lt);background:var(--silver-soft)}
+
+/* ---------- calculator extras ---------- */
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin-block:4px 12px}
+.presets button{background:#fff;color:var(--fg);border:1px solid var(--line-strong);
+  border-radius:999px;padding:6px 14px;font-weight:400;font-size:.92rem;cursor:pointer}
+.presets button:hover{border-color:var(--silver);background:#fff;color:var(--silver)}
+.presets button:active{background:var(--silver-soft)}
+.calc fieldset.quote{padding:4px 16px 12px}
+.calc legend{font-weight:700;font-size:.92rem;padding-inline:6px}
+.calc output hr{border:0;border-top:1px solid var(--line);margin-block:12px}
+.calc .warn{color:var(--down);font-weight:700}
+.snapshot-note{color:var(--muted);font-size:.82rem;margin-block:8px 0}
+
+/* ---------- small text bits ---------- */
+.cmp{white-space:nowrap}
+.fine{font-size:.82rem}
+nav.index{display:flex;flex-wrap:wrap;gap:4px 18px;padding-block:14px;
+  border-top:1px solid #2c2517;margin-top:14px}
+nav.index a{color:var(--ink-muted);text-decoration:none;font-size:.86rem}
+nav.index a:hover{color:var(--gold-lt);text-decoration:underline}
+footer.site .fresh{color:var(--ink-fg)}
+
+/* ---------- focus: visible everywhere, not only in the calculators ---------- */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{
+  outline:3px solid var(--gold);outline-offset:2px;border-radius:4px}
+header.site a:focus-visible,footer.site a:focus-visible{outline-color:var(--gold-lt)}
+
+/* ---------- narrow screens ---------- */
+@media(max-width:480px){
+  .bar{gap:8px}
+  a.lang{font-size:.8rem;padding:9px 13px}
+  .presets button{padding:8px 14px}       /* 40px tall: a real touch target */
+  .calc input,.calc select{max-width:none}
+  nav.index{gap:4px 14px}
+}
+
+/* A table that scrolls sideways must LOOK like it does, or a reader on a phone simply
+   believes the last column does not exist. Pure CSS: the shadows sit on the scroll box and
+   disappear at each end as it is scrolled. */
+.scroll{
+  background:
+    linear-gradient(to right,var(--bg) 30%,rgba(255,254,251,0)) left center/28px 100% no-repeat,
+    linear-gradient(to left,var(--bg) 30%,rgba(255,254,251,0)) right center/28px 100% no-repeat,
+    radial-gradient(farthest-side at 0 50%,rgba(60,45,10,.16),rgba(60,45,10,0)) left center/12px 100% no-repeat,
+    radial-gradient(farthest-side at 100% 50%,rgba(60,45,10,.16),rgba(60,45,10,0)) right center/12px 100% no-repeat;
+  background-attachment:local,local,scroll,scroll;
+}
+.scrollhint{display:none;color:var(--muted);font-size:.8rem;margin-block:6px 0}
+@media(max-width:720px){.scrollhint{display:block}}
+/* A closed market is information, not a fault: it gets its own quiet colour so it does not
+   read like the red stale warning, which really is a fault. */
+.banner.closed{background:#f3f1ea;color:#4a4234;border-bottom:1px solid var(--line-strong)}
