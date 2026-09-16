@@ -321,6 +321,7 @@ def site_ld(config, base):
 
 def page(config, c, reg_page, ctx_extra, built):
     p = reg_page
+    app_privacy = p.key in ("app_privacy_en", "app_privacy_ar")
     base = config["base_url"].rstrip("/")
     out = DIST / p.path.strip("/") / "index.html" if p.path != "/" else DIST / "index.html"
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -337,7 +338,7 @@ def page(config, c, reg_page, ctx_extra, built):
     ld_html = "".join(f"<script type='application/ld+json'>{json.dumps(o, ensure_ascii=False)}</script>" for o in ld)
 
     sample_banner = ""
-    if c["is_sample"]:
+    if c["is_sample"] and not app_privacy:
         sample_banner = ("<div class='sample'>نسخة تجريبية: الأسعار بيانات تجريبية وليست أسعارًا حقيقية</div>"
                          if p.lang == "ar" else "<div class='sample'>Prototype: SAMPLE data, not real prices</div>")
 
@@ -352,14 +353,19 @@ def page(config, c, reg_page, ctx_extra, built):
         "nav": nav_html(p.lang, p.path),
         "lang_switch": f"<a class='lang' href='{switch_path}' hreflang='{'en' if p.lang == 'ar' else 'ar'}'>{switch_label}</a>",
         "sample_banner": sample_banner, "content": body,
-        "css_url": static_url("style.css"), "js_url": static_url("calc.js"),
+        "css_url": static_url("style.css"),
+        "page_script": "" if app_privacy else f'<script src="{static_url("calc.js")}" defer></script>',
+        "price_notices": "" if app_privacy else (
+            '<div id="stale-notice" class="banner stale" role="status" hidden></div>\n'
+            '<div id="refresh-notice" class="banner refresh" role="status" hidden></div>'),
         "og_title": html.escape(title), "og_description": html.escape(description),
         "og_url": base + p.path, "og_image": base + "/static/og.png",
         "og_locale": "ar_SA" if p.lang == "ar" else "en_US",
         "structured_data": ld_html,
         "page_key": p.key, "page_locale": p.hreflang,
-        "snapshot_url": config.get("public_snapshot_path", "/data/prices.json"),
-        "footer": render("footer_ar.html" if p.lang == "ar" else "footer_en.html", c["footer_ctx"][p.lang]),
+        "snapshot_url": "" if app_privacy else config.get("public_snapshot_path", "/data/prices.json"),
+        "footer": (f'<footer class="site"><p><bdi>Mithqal Labs</bdi> · <bdi>Gold Price Today</bdi></p>{footer_index(p.lang)}</footer>'
+                   if app_privacy else render("footer_ar.html" if p.lang == "ar" else "footer_en.html", c["footer_ctx"][p.lang])),
         "year": c["snapshot"]["generated_local"][:4],
     })
     out.write_text(full, encoding="utf-8")
@@ -600,6 +606,11 @@ def build(config):
 
     page(config, c, REG.by_key("en_method"), dict(methodology_table=methodology_table(config, "en")), built)
 
+    # TODO: Recheck both app policies when the Android production price-data route is
+    # frozen, or Firebase collection changes. This reminder is never rendered to HTML.
+    for key in ("app_privacy_en", "app_privacy_ar"):
+        page(config, c, REG.by_key(key), {}, built)
+
     write_assets(config, c, snap, built)
     print(f"Built {len(built)} pages from {c['source']} (quote {snap['quoted_local'] or 'time unknown'} Riyadh, "
           f"status {snap['status']}). Gold 24K {fmt(c['gold'])} SAR/g, 21K {common['g21']}, "
@@ -615,7 +626,8 @@ def footer_index(lang):
              "sa_calculator": "حاسبة الذهب", "sa_zakat": "زكاة الذهب والفضة",
              "sa_sell": "سعر البيع والشراء", "sa_updown": "مرتفع ولا نازل", "sa_method": "المنهجية",
              "en_gold": "Gold rate", "en_silver": "Silver price", "en_calculator": "Gold calculator",
-             "en_sell": "Buy and sell price", "en_updown": "Up or down", "en_method": "Methodology"}
+             "en_sell": "Buy and sell price", "en_updown": "Up or down", "en_method": "Methodology",
+             "app_privacy_en": "Gold Price Today app privacy", "app_privacy_ar": "خصوصية تطبيق Gold Price Today"}
     return "<nav class='index'>" + "".join(
         f"<a href='{p.path}'>{label.get(p.key, p.key)}</a>" for p in items) + "</nav>"
 
