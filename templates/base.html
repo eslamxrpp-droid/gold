@@ -28,8 +28,7 @@
 </head>
 <body data-page="{{page_key}}" data-locale="{{page_locale}}" data-snapshot="{{snapshot_url}}">
 {{sample_banner}}
-<div id="stale-notice" class="banner stale" role="status" hidden></div>
-<div id="refresh-notice" class="banner refresh" role="status" hidden></div>
+{{price_notices}}
 <a class="skip" href="#main">تخطَّ إلى المحتوى / Skip to content</a>
 <header class="site">
   <div class="bar">
@@ -42,6 +41,6 @@
 {{content}}
 </main>
 {{footer}}
-<script src="{{js_url}}" defer></script>
+{{page_script}}
 </body>
 </html>
