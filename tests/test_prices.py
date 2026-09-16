@@ -1975,9 +1975,10 @@ class BullionSection(unittest.TestCase):
             self.assertNotIn("<output", section, rel)
 
     def test_the_tool_adds_no_route_and_no_tracking(self):
-        self.assertEqual(len(REG.PAGES), 14)
+        price_pages = [p for p in REG.PAGES if not p.key.startswith("app_privacy_")]
+        self.assertEqual(len(price_pages), 14)
         sitemap = (SampleSite.path() / "sitemap.xml").read_text(encoding="utf-8")
-        self.assertEqual(sitemap.count("<loc>"), 14)
+        self.assertEqual(sitemap.count("<loc>"), len(REG.PAGES))
         self.assertNotIn("bullion", sitemap)
         self.assertTrue((SampleSite.path() / "404.html").exists(), "root 404 stopped building")
         src = Path(CALC_JS).read_text(encoding="utf-8")
