@@ -29,11 +29,11 @@ SITE_DESC_MAX = 155
 class Page:
     def __init__(self, key, path, lang, template, role, title, description,
                  alt_group=None, nav=None, sitemap=True, price_driven=True,
-                 content_updated="2026-09-12", breadcrumb=None, noindex=False, status="live"):
+                 content_updated="2026-09-12", breadcrumb=None, noindex=False, status="live", hreflang=None):
         self.key = key
         self.path = path
         self.lang = lang
-        self.hreflang = "ar-SA" if lang == "ar" else "en-SA"
+        self.hreflang = hreflang or ("ar-SA" if lang == "ar" else "en-SA")
         self.template = template
         self.role = role
         self.title = title
@@ -55,6 +55,22 @@ AR_HOME = ("الرئيسية", "/")
 EN_HOME = ("Mithqal", "/sa/en/")
 
 PAGES = [
+    Page(
+        key="app_privacy_en", path="/apps/gold-price-today/privacy/", lang="en",
+        template="app_privacy_en.html", hreflang="en",
+        role="Privacy policy for the Gold Price Today Android app by Mithqal Labs.",
+        title="Gold Price Today Privacy Policy | Mithqal Labs",
+        description="Privacy policy for the Gold Price Today Android app by Mithqal Labs: on-device data, disabled Firebase collection and privacy contact.",
+        alt_group="app_privacy", price_driven=False, content_updated="2026-09-16",
+    ),
+    Page(
+        key="app_privacy_ar", path="/ar/apps/gold-price-today/privacy/", lang="ar",
+        template="app_privacy_ar.html", hreflang="ar",
+        role="Privacy policy for the Gold Price Today Android app by Mithqal Labs.",
+        title="سياسة خصوصية Gold Price Today | Mithqal Labs",
+        description="سياسة خصوصية تطبيق Gold Price Today من Mithqal Labs: البيانات المحلية، وتعطيل جمع بيانات Firebase، والتواصل بشأن الخصوصية.",
+        alt_group="app_privacy", price_driven=False, content_updated="2026-09-16",
+    ),
     # ---------------------------------------------------------------- Arabic
     Page(
         key="home", path="/", lang="ar", template="home.html",
