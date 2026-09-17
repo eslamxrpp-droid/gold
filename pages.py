@@ -61,7 +61,7 @@ PAGES = [
         role="Privacy policy for the Gold Price Today Android app by Mithqal Labs.",
         title="Gold Price Today Privacy Policy | Mithqal Labs",
         description="Privacy policy for the Gold Price Today Android app by Mithqal Labs: on-device data, disabled Firebase collection and privacy contact.",
-        alt_group="app_privacy", price_driven=False, content_updated="2026-09-16",
+        alt_group="app_privacy", price_driven=False, content_updated="2026-09-17",
     ),
     Page(
         key="app_privacy_ar", path="/ar/apps/gold-price-today/privacy/", lang="ar",
@@ -69,7 +69,7 @@ PAGES = [
         role="Privacy policy for the Gold Price Today Android app by Mithqal Labs.",
         title="سياسة خصوصية Gold Price Today | Mithqal Labs",
         description="سياسة خصوصية تطبيق Gold Price Today من Mithqal Labs: البيانات المحلية، وتعطيل جمع بيانات Firebase، والتواصل بشأن الخصوصية.",
-        alt_group="app_privacy", price_driven=False, content_updated="2026-09-16",
+        alt_group="app_privacy", price_driven=False, content_updated="2026-09-17",
     ),
     # ---------------------------------------------------------------- Arabic
     Page(

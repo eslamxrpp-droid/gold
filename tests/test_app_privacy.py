@@ -61,10 +61,16 @@ class AppPrivacy(unittest.TestCase):
         for expected in ("Firebase Analytics collection and automatic Crashlytics crash-report collection are disabled",
                          "App analytics event logging is also disabled",
                          "There is currently no in-app switch", "maintain local technical state",
-                         "Price fetching is not configured in the current release",
-                         "does not currently make price-data requests", "requesting IP address",
+                         "contacts Metals.dev directly over HTTPS",
+                         "device or network information", "requesting IP address",
                          "Calculator inputs are not needed for price requests"):
             self.assertIn(expected, doc)
+        for rel in self.paths:
+            self.assertIn('href="https://metals.dev/policy/privacy"', SampleSite.html(rel))
+        self.assertNotIn("Price fetching is not configured", doc)
+        arabic = SampleSite.html(self.paths[1])
+        self.assertIn("يتصل إصدار التطبيق مباشرةً", arabic)
+        self.assertNotIn("جلب الأسعار غير مهيأ", arabic)
 
     def test_no_visible_placeholders_or_private_configuration(self):
         for rel in self.paths:

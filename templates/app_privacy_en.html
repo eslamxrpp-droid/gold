@@ -1,6 +1,6 @@
 <h1>Gold Price Today Privacy Policy</h1>
 <p class="lead">This policy explains data handling in the <strong>Gold Price Today Android app</strong>, provided by <strong>Mithqal Labs</strong>. It does not describe the separate Mithqal website price tools.</p>
-<p class="updated">Last updated: <time datetime="2026-09-16">16 September 2026</time> (UTC)</p>
+<p class="updated">Last updated: <time datetime="2026-09-17">17 September 2026</time> (UTC)</p>
 <p>Android package: <bdi>com.gold.price.today</bdi>. This English page is the primary version of the policy; an Arabic translation is available using the language link above.</p>
 
 <section>
@@ -17,9 +17,9 @@
 
 <section>
   <h2>Network and price-data processing</h2>
-  <p>Price fetching is not configured in the current release. It does not currently make price-data requests. When price access is enabled, the app is designed to retrieve gold reference prices, exchange rates and source timestamps over HTTPS, and keep the last successful result on your device.</p>
-  <p>A service receiving a network request ordinarily receives technical information such as the requesting IP address, request time and protocol/request metadata needed to deliver and protect the service. Calculator inputs are not needed for price requests. The production price-service route has not yet been activated; this policy will be reviewed before that changes, including identifying the receiving service. We do not describe a planned proxy or a direct provider connection as already operating.</p>
-  <p>The app identifies Metals.dev as the source of spot reference data. That source label is not a claim that the current release sends requests directly to Metals.dev. For the separate Saudi website's calculations, see the <a href="/sa/en/methodology/">website price methodology</a>; that page is not a description of the Android app's network route.</p>
+  <p>The release app contacts Metals.dev directly over HTTPS to retrieve spot gold reference prices, exchange rates and source timestamps. It keeps the last successful result in private storage on your device for offline use and displays the source update time. Older saved prices are labelled as stale; they are not guaranteed current jewellery-shop quotes.</p>
+  <p>Metals.dev and the infrastructure handling these requests ordinarily receive technical information such as the requesting IP address, request time and protocol/request metadata. This may include device or network information conveyed by standard connection details or request headers. Such information can be used to deliver and protect the service. Calculator inputs are not needed for price requests and are not sent. The app does not send your selected market, language or currency preference as part of its price-data request; conversions are calculated on your device.</p>
+  <p>See the <a href="https://metals.dev/policy/privacy">Metals.dev Privacy Policy</a> for the provider's disclosures. We do not promise that provider operational records are immediately deleted or processed only in memory. For the separate Saudi website's calculations, see the <a href="/sa/en/methodology/">website price methodology</a>; that page is not a description of the Android app's network route.</p>
 </section>
 
 <section>
