@@ -286,5 +286,11 @@
   "gold_usd_oz": 4140.81,
   "silver_usd_oz": 57.105,
   "kind": "provider_daily"
+ },
+ {
+  "date": "2026-10-20",
+  "gold_usd_oz": 4125.465,
+  "silver_usd_oz": 58.003,
+  "kind": "provider_daily"
  }
 ]
